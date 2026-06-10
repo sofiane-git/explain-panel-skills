@@ -1,0 +1,21 @@
+{
+  "name": "docpanel",
+  "description": "Two Claude Code skills that turn any codebase into a fully populated ExplainPanel documentation component for React/Next.js or Vue/Nuxt.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Sofiane Conan"
+  },
+  "homepage": "https://github.com/sofiane-git/explain-panel-skills",
+  "repository": "https://github.com/sofiane-git/explain-panel-skills",
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "code-explanation",
+    "accordion",
+    "react",
+    "vue",
+    "nextjs",
+    "nuxt",
+    "skills"
+  ]
+}

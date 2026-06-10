@@ -1,0 +1,30 @@
+{
+  "name": "explain-panel-skills",
+  "description": "Marketplace for the ExplainPanel skills — generate accordion documentation panels from any codebase.",
+  "owner": {
+    "name": "Sofiane Conan"
+  },
+  "plugins": [
+    {
+      "name": "docpanel",
+      "source": "./",
+      "description": "Two Claude Code skills (/explore-pipeline + /explain-panel) that generate a beautiful accordion documentation component from any codebase.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Sofiane Conan"
+      },
+      "homepage": "https://github.com/sofiane-git/explain-panel-skills",
+      "license": "MIT",
+      "keywords": [
+        "documentation",
+        "code-explanation",
+        "accordion",
+        "react",
+        "vue",
+        "nextjs",
+        "nuxt"
+      ],
+      "category": "documentation"
+    }
+  ]
+}
