@@ -1,0 +1,172 @@
+{{!
+Placeholders (same as react-tailwind variant, see that template's header for full list).
+Additional notes for Vue:
+- shiki produces pre-rendered HTML strings; we render them with v-html (sanitized at source — shiki output is safe).
+- Annotation highlight is applied via shiki's transformerNotationHighlight pattern: we wrap annotated lines in <span class="line annotated"> on the client.
+}}
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { codeToHtml } from 'shiki'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export type SectionId = {{ SECTION_ID_UNION }}
+type Group = {{ GROUP_ID_UNION }}
+
+const GROUP_LABELS: Record<Group, { label: string; color: string }> = {
+{{ GROUP_LABELS_ENTRIES }}
+}
+
+type Section = {
+  id: SectionId
+  icon: string
+  title: string
+  module: string
+  group: Group
+  language: string
+  code: string
+  annotations: Record<number, string>
+  summary?: string
+}
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+{{ CODE_AND_ANNOT_CONSTS }}
+
+const SECTIONS: Section[] = [
+{{ SECTIONS_ENTRIES }}
+]
+
+const GROUP_ORDER: Group[] = {{ GROUP_ORDER_ARRAY }}
+
+const sectionsOrdered = computed(() =>
+  GROUP_ORDER.flatMap((g) => SECTIONS.filter((s) => s.group === g)),
+)
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+const open = ref<SectionId | null>(null)
+const highlighted = ref<Record<string, string>>({})
+
+function toggle(id: SectionId) {
+  open.value = open.value === id ? null : id
+}
+
+function onKey(e: KeyboardEvent) {
+  if (e.key === 'Escape' && open.value) {
+    const prev = open.value
+    open.value = null
+    document.getElementById(`explain-btn-${prev}`)?.focus()
+  }
+}
+
+async function highlightSection(section: Section) {
+  const html = await codeToHtml(section.code, {
+    lang: section.language,
+    theme: 'vitesse-dark',
+  })
+  // Mark annotated lines so CSS can highlight them.
+  const annotated = Object.keys(section.annotations).map(Number)
+  let lineNo = 0
+  const tagged = html.replace(/<span class="line">/g, () => {
+    lineNo += 1
+    return annotated.includes(lineNo)
+      ? '<span class="line annotated" style="background:rgba(99,102,241,0.15);display:block">'
+      : '<span class="line" style="display:block">'
+  })
+  highlighted.value[section.id] = tagged
+}
+
+onMounted(async () => {
+  document.addEventListener('keydown', onKey)
+  for (const section of SECTIONS) {
+    await highlightSection(section)
+  }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', onKey)
+})
+</script>
+
+<template>
+  <aside class="rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 overflow-hidden">
+    <div class="border-b border-black/10 dark:border-white/10 px-4 py-3">
+      <p class="text-xs font-semibold uppercase tracking-widest text-neutral-500">
+        {{ HEADER_ICON }} {{ HEADER_TITLE }}
+      </p>
+      <div class="mt-2 flex flex-wrap gap-1.5">
+        <span
+          v-for="g in GROUP_ORDER"
+          :key="g"
+          :class="`rounded-full border px-2 py-0.5 text-[10px] font-medium ${GROUP_LABELS[g].color}`"
+        >
+          {{ GROUP_LABELS[g].label }}
+        </span>
+      </div>
+    </div>
+    <div class="divide-y divide-black/5 dark:divide-white/5">
+      <template v-for="(section, i) in sectionsOrdered" :key="section.id">
+        <div
+          v-if="i === 0 || sectionsOrdered[i - 1].group !== section.group"
+          :class="`border-b px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest ${GROUP_LABELS[section.group].color}`"
+        >
+          {{ GROUP_LABELS[section.group].label }}
+        </div>
+        <button
+          :id="`explain-btn-${section.id}`"
+          type="button"
+          :aria-expanded="open === section.id"
+          :aria-controls="`explain-panel-${section.id}`"
+          @click="toggle(section.id)"
+          :class="`flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
+            open === section.id
+              ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-300'
+              : 'text-neutral-600 dark:text-neutral-400 hover:bg-black/5 dark:hover:bg-white/5'
+          }`"
+        >
+          <span class="shrink-0" aria-hidden="true">{{ section.icon }}</span>
+          <div class="flex-1 min-w-0">
+            <div>{{ section.title }}</div>
+            <div class="text-[10px] font-normal font-mono text-neutral-400 truncate">
+              {{ section.module }}
+            </div>
+          </div>
+          <span
+            :class="`text-xs transition-transform shrink-0 ${open === section.id ? 'rotate-180' : ''}`"
+            aria-hidden="true"
+          >▾</span>
+        </button>
+        <div
+          :id="`explain-panel-${section.id}`"
+          role="region"
+          :aria-labelledby="`explain-btn-${section.id}`"
+          :class="`grid transition-all duration-300 ${open === section.id ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`"
+        >
+          <div class="overflow-hidden">
+            <div class="px-4 pb-4 pt-2 space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
+              <p v-if="section.summary">{{ section.summary }}</p>
+              <div class="relative mt-2 rounded-lg overflow-hidden text-[11px]">
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <div v-html="highlighted[section.id]" />
+                <div
+                  v-if="Object.keys(section.annotations).length > 0"
+                  class="bg-neutral-900 border-t border-white/5 px-3 py-2 space-y-1"
+                >
+                  <div
+                    v-for="(note, line) in section.annotations"
+                    :key="line"
+                    class="flex gap-2 text-[10px]"
+                  >
+                    <span class="shrink-0 font-mono text-indigo-400">L{{ line }}</span>
+                    <span class="text-neutral-400">{{ note }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </aside>
+</template>

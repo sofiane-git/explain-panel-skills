@@ -1,0 +1,217 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-kit/main/schemas/pipeline-map.schema.json",
+  "schemaVersion": "1.0",
+  "project": "Nauda Palisse — Veille Tech",
+  "framework": "fastapi",
+  "roots": ["app/", "web/"],
+  "header": {
+    "title": "Comment ça marche — flux de données complet",
+    "icon": "📚"
+  },
+  "groups": [
+    {
+      "id": "ingestion",
+      "label": "Ingestion",
+      "color": "sky",
+      "sections": [
+        {
+          "id": "news-api-ingest",
+          "icon": "📥",
+          "title": "NewsAPI Ingester",
+          "summary": "Pulls articles from NewsAPI for one or more topics, deduplicates by sha256, and merges tags when an article matches multiple topics.",
+          "file": "app/ingest/news_api.py",
+          "function": "NewsApiIngester",
+          "module": "app/ingest/news_api.py · NewsApiIngester.run()",
+          "language": "python",
+          "snippet_start": 12,
+          "snippet_end": 45,
+          "annotations": {
+            "5": "Dedup by sha256(title+source) — re-ingesting the same article produces the same id, upsert is idempotent.",
+            "10": "Tag fusion: an article retrieved via both Python and AI/ML topics inherits both tags.",
+            "18": "page_size=100 is the NewsAPI free-tier maximum.",
+            "21": "Truncate dates to YYYY-MM-DD — NewsAPI rejects timezone-aware values."
+          },
+          "group": "ingestion"
+        },
+        {
+          "id": "scraper",
+          "icon": "🕷️",
+          "title": "HTML Scraping & Cleaning",
+          "summary": "NewsAPI returns ~200 chars per article. The scraper fetches the full HTML, strips boilerplate, and converts the result to Markdown.",
+          "file": "app/ingest/scraper.py",
+          "function": "Scraper",
+          "module": "app/ingest/scraper.py · Scraper._fetch()",
+          "language": "python",
+          "snippet_start": 22,
+          "snippet_end": 55,
+          "annotations": {
+            "3": "timeout=10s — if the source is slow, fall back to NewsAPI's 200-char description.",
+            "7": "User-Agent set: many sites block default Python agents.",
+            "12": "raise_for_status() lets the caller treat 4xx/5xx uniformly.",
+            "18": "lxml is C-backed, ~4× faster than the stdlib parser.",
+            "22": "strip_boilerplate removes 30–60% of HTML weight before Markdown conversion."
+          },
+          "group": "ingestion"
+        }
+      ]
+    },
+    {
+      "id": "indexation",
+      "label": "Indexation",
+      "color": "indigo",
+      "sections": [
+        {
+          "id": "ingest-pipeline",
+          "icon": "🏗️",
+          "title": "Embedding & Indexation Pipeline",
+          "summary": "Splits scraped articles into 1200-char chunks with 200-char overlap, embeds them in batches, and upserts into ChromaDB.",
+          "file": "app/ingest/pipeline.py",
+          "function": "ingest",
+          "module": "app/ingest/pipeline.py · ingest()",
+          "language": "python",
+          "snippet_start": 1,
+          "snippet_end": 35,
+          "annotations": {
+            "5": "1200 chars (~200 words) per chunk — long enough for meaning, short enough for precision.",
+            "6": "200-char overlap stitches meaning across chunk boundaries.",
+            "16": "Deterministic sha256 → re-ingest is a safe no-op (upsert handles duplicates).",
+            "21": "Batches of 16 keep the embedding API within request limits.",
+            "26": "documents stored raw inside ChromaDB so we can display them in cards without a separate store."
+          },
+          "group": "indexation"
+        },
+        {
+          "id": "chroma",
+          "icon": "🗄️",
+          "title": "ChromaDB client & cosine space",
+          "summary": "Single shared HNSW collection configured with cosine similarity — the architectural decision that drives every downstream distance computation.",
+          "file": "app/rag/chroma_client.py",
+          "function": "get_collection",
+          "module": "app/rag/chroma_client.py · get_collection()",
+          "language": "python",
+          "snippet_start": 4,
+          "snippet_end": 30,
+          "annotations": {
+            "1": "lru_cache(maxsize=1): one HTTP client for the whole process lifetime.",
+            "11": "hnsw:space='cosine' — without this, ChromaDB defaults to L2 (Euclidean), which behaves differently for variable-length text.",
+            "15": "HNSW is a logarithmic-time graph index — fast lookup across millions of vectors."
+          },
+          "group": "indexation"
+        }
+      ]
+    },
+    {
+      "id": "retrieval",
+      "label": "Récupération",
+      "color": "amber",
+      "sections": [
+        {
+          "id": "orchestration",
+          "icon": "🗺️",
+          "title": "Chat orchestration",
+          "summary": "handle_chat() runs five sequential steps and is the only entry point the API surface calls.",
+          "file": "app/chat.py",
+          "function": "handle_chat",
+          "module": "app/chat.py · handle_chat()",
+          "language": "python",
+          "snippet_start": 28,
+          "snippet_end": 52,
+          "annotations": {
+            "3": "Query expansion combines the question with selected topics.",
+            "8": "k=8 — always returns 8 chunks even when relevance is low (filtering is the LLM's job).",
+            "12": "Enrichment retrieves the full article for each retrieved chunk's parent.",
+            "17": "Fresh news bypasses embedding — fetched live from NewsAPI."
+          },
+          "group": "retrieval"
+        },
+        {
+          "id": "rag",
+          "icon": "🔍",
+          "title": "Vector search (RAG)",
+          "summary": "Embeds the expanded query, asks ChromaDB for the 8 nearest neighbours by cosine distance, and returns content + metadata + distance.",
+          "file": "app/rag/retrieval.py",
+          "function": "retrieve",
+          "module": "app/rag/retrieval.py · retrieve()",
+          "language": "python",
+          "snippet_start": 12,
+          "snippet_end": 40,
+          "annotations": {
+            "4": "embed() — Azure AI Inference, same model used at ingest time. Symmetry matters.",
+            "7": "n_results=k — ChromaDB always returns k, distances tell you whether to trust them.",
+            "9": "Distances must be requested explicitly — they're not in the default include set.",
+            "16": "Truncate to 2000 chars before embedding — avoid the model's token cap silently."
+          },
+          "group": "retrieval"
+        },
+        {
+          "id": "enrich",
+          "icon": "📄",
+          "title": "Chunk enrichment",
+          "summary": "Reconstructs the full article for the top 5 retrieved chunks by pulling every sibling chunk back from ChromaDB.",
+          "file": "app/ingest/enrich.py",
+          "function": "enrich_retrieval",
+          "module": "app/ingest/enrich.py · enrich_retrieval()",
+          "language": "python",
+          "snippet_start": 8,
+          "snippet_end": 38,
+          "annotations": {
+            "6": "Keep only the closest chunk per document_id — avoid retrieving the same article via multiple chunks.",
+            "10": "Top 5 only — context budget is finite; the rest stays as raw chunks.",
+            "16": "collection.get() (not query) — no semantic ranking needed, we already know which doc we want.",
+            "21": "Sort by chunk_index to rebuild the article in original order.",
+            "25": "distance=0.0 marks the enriched article as max-priority for the LLM."
+          },
+          "group": "retrieval"
+        }
+      ]
+    },
+    {
+      "id": "generation",
+      "label": "Génération",
+      "color": "emerald",
+      "sections": [
+        {
+          "id": "llm",
+          "icon": "🤖",
+          "title": "LLM synthesis",
+          "summary": "Builds the system + user payload, calls Azure AI Inference with JSON-strict output, returns Markdown.",
+          "file": "app/rag/llm.py",
+          "function": "compose_answer",
+          "module": "app/rag/llm.py · compose_answer()",
+          "language": "python",
+          "snippet_start": 32,
+          "snippet_end": 65,
+          "annotations": {
+            "5": "JSON-strict output: the LLM is forced into a parseable shape — no free-text drift.",
+            "9": "lru_cache(maxsize=1) — share the HTTP client, reuse the TLS handshake.",
+            "13": "temperature=0.2 — stable, reproducible answers. 1.0 would be creative but unreliable.",
+            "17": "max_completion_tokens=4096 — caps Mistral-Large-3 output to avoid silent truncation.",
+            "24": "ainvoke is async — FastAPI's event loop stays free during LLM latency.",
+            "29": "Cards reference ids the LLM cites; the UI resolves them to clickable sources."
+          },
+          "group": "generation"
+        },
+        {
+          "id": "results",
+          "icon": "📊",
+          "title": "Card construction",
+          "summary": "Turns retrieved chunks and fresh articles into ArticleCard objects, mapping distance to a 0–100 similarity score for the UI.",
+          "file": "app/rag/llm.py",
+          "function": "_build_cards",
+          "module": "app/rag/llm.py · _build_cards() + _extract_answer()",
+          "language": "python",
+          "snippet_start": 78,
+          "snippet_end": 110,
+          "annotations": {
+            "6": "snippet[:280] — short preview; the LLM saw [:600] in its context.",
+            "8": "card_type='rag' lets the frontend show the SimilarityBar for these cards only.",
+            "9": "distance ∈ [0, 2] — ChromaDB with cosine returns 1 - cosine_similarity.",
+            "15": "Fresh news has no distance — they didn't pass through the embedding model.",
+            "22": "json.loads then fallback to raw — be lenient if the LLM ever skips the JSON envelope."
+          },
+          "group": "generation"
+        }
+      ]
+    }
+  ]
+}

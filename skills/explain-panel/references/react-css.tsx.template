@@ -1,0 +1,170 @@
+{{!
+React + plain CSS variant. Use when Tailwind is NOT detected.
+Pairs with explain-panel.css.template (write both to disk).
+
+Placeholders: same set as react-tailwind.tsx.template, plus:
+- {{ GROUP_LABELS_ENTRIES_CSS }} : one line per group, where `color` references CSS vars,
+  e.g. '"ingestion": { label: "Ingestion", color: "explain-panel__chip--ingestion" },'
+}}
+"use client";
+
+import { useState, useEffect, useRef, type ReactNode } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import "./ExplainPanel.css";
+
+export type SectionId = {{ SECTION_ID_UNION }};
+type Group = {{ GROUP_ID_UNION }};
+
+const GROUP_LABELS: Record<Group, { label: string; modifier: string }> = {
+{{ GROUP_LABELS_ENTRIES_CSS }}
+};
+
+type Section = {
+  id: SectionId;
+  icon: string;
+  title: string;
+  module: string;
+  group: Group;
+  language: string;
+  code: string;
+  annotations: Record<number, string>;
+  summary?: string;
+};
+
+function CodeBlock({
+  code,
+  language,
+  annotations,
+}: {
+  code: string;
+  language: string;
+  annotations?: Record<number, string>;
+}) {
+  return (
+    <div className="explain-panel__code-block">
+      <SyntaxHighlighter
+        language={language}
+        style={vscDarkPlus}
+        customStyle={{ margin: 0, fontSize: "11px", lineHeight: 1.6 }}
+        showLineNumbers
+        wrapLines
+        lineProps={(n: number) => ({
+          className: annotations?.[n] ? "line annotated" : "line",
+        })}
+      >
+        {code}
+      </SyntaxHighlighter>
+      {annotations && Object.keys(annotations).length > 0 && (
+        <div className="explain-panel__annotations">
+          {Object.entries(annotations).map(([line, note]) => (
+            <div key={line} className="explain-panel__annotation">
+              <span className="explain-panel__annotation-line">L{line}</span>
+              <span className="explain-panel__annotation-note">{note}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+{{ CODE_AND_ANNOT_CONSTS }}
+
+const SECTIONS: Section[] = [
+{{ SECTIONS_ENTRIES }}
+];
+
+const GROUP_ORDER: Group[] = {{ GROUP_ORDER_ARRAY }};
+
+const SECTIONS_ORDERED = GROUP_ORDER.flatMap((g) =>
+  SECTIONS.filter((s) => s.group === g),
+);
+
+export default function ExplainPanel() {
+  const [open, setOpen] = useState<SectionId | null>(null);
+  const panelRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && open) {
+        setOpen(null);
+        document.getElementById(`explain-btn-${open}`)?.focus();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <aside ref={panelRef} className="explain-panel">
+      <div className="explain-panel__header">
+        <p className="explain-panel__title">
+          {{ HEADER_ICON }} {{ HEADER_TITLE }}
+        </p>
+        <div className="explain-panel__chips">
+          {GROUP_ORDER.map((g) => (
+            <span
+              key={g}
+              className={`explain-panel__chip ${GROUP_LABELS[g].modifier}`}
+            >
+              {GROUP_LABELS[g].label}
+            </span>
+          ))}
+        </div>
+      </div>
+      {SECTIONS_ORDERED.map((section, i) => {
+        const isOpen = open === section.id;
+        const prevGroup = i > 0 ? SECTIONS_ORDERED[i - 1].group : null;
+        const showGroupHeader = section.group !== prevGroup;
+        const gl = GROUP_LABELS[section.group];
+        return (
+          <div key={section.id} className="explain-panel__item">
+            {showGroupHeader && (
+              <div className={`explain-panel__group-header ${gl.modifier}`}>
+                {gl.label}
+              </div>
+            )}
+            <button
+              id={`explain-btn-${section.id}`}
+              type="button"
+              aria-expanded={isOpen}
+              aria-controls={`explain-panel-${section.id}`}
+              onClick={() => setOpen((prev) => (prev === section.id ? null : section.id))}
+              className={`explain-panel__button ${isOpen ? "explain-panel__button--active" : ""}`}
+            >
+              <span className="explain-panel__icon" aria-hidden="true">{section.icon}</span>
+              <div className="explain-panel__labels">
+                <div>{section.title}</div>
+                <div className="explain-panel__module">{section.module}</div>
+              </div>
+              <span
+                className={`explain-panel__chevron ${isOpen ? "explain-panel__chevron--open" : ""}`}
+                aria-hidden="true"
+              >
+                ▾
+              </span>
+            </button>
+            <div
+              id={`explain-panel-${section.id}`}
+              role="region"
+              aria-labelledby={`explain-btn-${section.id}`}
+              className={`explain-panel__region ${isOpen ? "explain-panel__region--open" : ""}`}
+            >
+              <div className="explain-panel__region-inner">
+                <div className="explain-panel__content">
+                  {section.summary && <p>{section.summary}</p>}
+                  <CodeBlock
+                    code={section.code}
+                    language={section.language}
+                    annotations={section.annotations}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </aside>
+  );
+}

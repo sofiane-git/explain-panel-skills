@@ -1,0 +1,212 @@
+{{!
+Placeholders (substitute every {{ NAME }} before writing the file):
+
+- {{ HEADER_ICON }}           Emoji from header.icon. Default: 📚
+- {{ HEADER_TITLE }}          String from header.title. Default: "How it works — full data flow"
+- {{ SECTION_ID_UNION }}      TS union of all section ids, e.g. "ingest" | "scraper" | "chroma"
+- {{ GROUP_ID_UNION }}        TS union of all group ids
+- {{ GROUP_LABELS_ENTRIES }}  One line per group: '"group-id": { label: "Label", color: "<expanded-classes>" },'
+- {{ CODE_AND_ANNOT_CONSTS }} For each section: a CODE_<UPPER_ID> template literal and an ANNOT_<UPPER_ID> Record
+- {{ SECTIONS_ENTRIES }}      Array entries — one Section object per section in pipeline-map.json
+- {{ GROUP_ORDER_ARRAY }}     TS array literal of group ids in chronological order
+
+Notes:
+- Backticks and ${ inside snippet text must be escaped to \` and \${ when filling CODE_ constants.
+- Each annotations record uses snippet-relative line numbers (line 1 = first line of the snippet).
+- The component is self-contained: no path aliases, all Tailwind classes inlined.
+}}
+"use client";
+
+import { useState, useEffect, useRef, type ReactNode } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+export type SectionId = {{ SECTION_ID_UNION }};
+type Group = {{ GROUP_ID_UNION }};
+
+const GROUP_LABELS: Record<Group, { label: string; color: string }> = {
+{{ GROUP_LABELS_ENTRIES }}
+};
+
+type Section = {
+  id: SectionId;
+  icon: string;
+  title: string;
+  module: string;
+  group: Group;
+  language: string;
+  code: string;
+  annotations: Record<number, string>;
+  summary?: string;
+};
+
+// ── CodeBlock ──────────────────────────────────────────────────────────────────
+
+function CodeBlock({
+  code,
+  language,
+  annotations,
+}: {
+  code: string;
+  language: string;
+  annotations?: Record<number, string>;
+}) {
+  return (
+    <div className="relative mt-2 rounded-lg overflow-hidden text-[11px]">
+      <SyntaxHighlighter
+        language={language}
+        style={vscDarkPlus}
+        customStyle={{ margin: 0, borderRadius: "0.5rem", fontSize: "11px", lineHeight: "1.6" }}
+        showLineNumbers
+        wrapLines
+        lineProps={(n: number) =>
+          annotations?.[n]
+            ? { style: { background: "rgba(99,102,241,0.15)", display: "block" } }
+            : { style: { display: "block" } }
+        }
+      >
+        {code}
+      </SyntaxHighlighter>
+      {annotations && Object.keys(annotations).length > 0 && (
+        <div className="bg-neutral-900 border-t border-white/5 px-3 py-2 space-y-1">
+          {Object.entries(annotations).map(([line, note]) => (
+            <div key={line} className="flex gap-2 text-[10px]">
+              <span className="shrink-0 font-mono text-indigo-400">L{line}</span>
+              <span className="text-neutral-400">{note}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Code constants ────────────────────────────────────────────────────────────
+
+{{ CODE_AND_ANNOT_CONSTS }}
+
+// ── Sections ───────────────────────────────────────────────────────────────────
+
+const SECTIONS: Section[] = [
+{{ SECTIONS_ENTRIES }}
+];
+
+// ── Group ordering ─────────────────────────────────────────────────────────────
+
+const GROUP_ORDER: Group[] = {{ GROUP_ORDER_ARRAY }};
+
+const SECTIONS_ORDERED = GROUP_ORDER.flatMap((g) =>
+  SECTIONS.filter((s) => s.group === g),
+);
+
+// ── Component ──────────────────────────────────────────────────────────────────
+
+export default function ExplainPanel() {
+  const [open, setOpen] = useState<SectionId | null>(null);
+  const panelRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && open) {
+        setOpen(null);
+        const trigger = document.getElementById(`explain-btn-${open}`);
+        trigger?.focus();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <aside
+      ref={panelRef}
+      className="rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 overflow-hidden"
+    >
+      <div className="border-b border-black/10 dark:border-white/10 px-4 py-3">
+        <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">
+          {{ HEADER_ICON }} {{ HEADER_TITLE }}
+        </p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {GROUP_ORDER.map((g) => (
+            <span
+              key={g}
+              className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${GROUP_LABELS[g].color}`}
+            >
+              {GROUP_LABELS[g].label}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="divide-y divide-black/5 dark:divide-white/5">
+        {SECTIONS_ORDERED.map((section, i) => {
+          const isOpen = open === section.id;
+          const prevGroup = i > 0 ? SECTIONS_ORDERED[i - 1].group : null;
+          const showGroupHeader = section.group !== prevGroup;
+          const gl = GROUP_LABELS[section.group];
+          return (
+            <div key={section.id}>
+              {showGroupHeader && (
+                <div
+                  className={`border-b px-4 py-1.5 text-[10px] font-semibold uppercase tracking-widest ${gl.color}`}
+                >
+                  {gl.label}
+                </div>
+              )}
+              <button
+                id={`explain-btn-${section.id}`}
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={`explain-panel-${section.id}`}
+                onClick={() => setOpen((prev) => (prev === section.id ? null : section.id))}
+                className={`flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
+                  isOpen
+                    ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-300"
+                    : "text-neutral-600 dark:text-neutral-400 hover:bg-black/5 dark:hover:bg-white/5"
+                }`}
+              >
+                <span className="shrink-0" aria-hidden="true">
+                  {section.icon}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div>{section.title}</div>
+                  <div className="text-[10px] font-normal font-mono text-neutral-400 truncate">
+                    {section.module}
+                  </div>
+                </div>
+                <span
+                  className={`text-xs transition-transform shrink-0 ${isOpen ? "rotate-180" : ""}`}
+                  aria-hidden="true"
+                >
+                  ▾
+                </span>
+              </button>
+              <div
+                id={`explain-panel-${section.id}`}
+                role="region"
+                aria-labelledby={`explain-btn-${section.id}`}
+                className={`grid transition-all duration-300 ${
+                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="px-4 pb-4 pt-2 space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
+                    {section.summary && (
+                      <p className="text-neutral-600 dark:text-neutral-300">{section.summary}</p>
+                    )}
+                    <CodeBlock
+                      code={section.code}
+                      language={section.language}
+                      annotations={section.annotations}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </aside>
+  );
+}

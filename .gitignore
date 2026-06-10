@@ -1,0 +1,28 @@
+node_modules/
+dist/
+build/
+.cache/
+.next/
+.nuxt/
+.output/
+.vercel/
+.turbo/
+.parcel-cache/
+
+# editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Python (in examples)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local runs
+*.log
+*.local
+workspace/
+evals-output/

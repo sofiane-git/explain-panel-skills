@@ -1,0 +1,109 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-kit/main/schemas/pipeline-map.schema.json",
+  "schemaVersion": "1.0",
+  "project": "Next.js Notes App",
+  "framework": "nextjs",
+  "roots": ["."],
+  "header": {
+    "title": "How it works — full data flow",
+    "icon": "📚"
+  },
+  "groups": [
+    {
+      "id": "routing",
+      "label": "Routing",
+      "color": "sky",
+      "sections": [
+        {
+          "id": "page",
+          "icon": "🚪",
+          "title": "App Router page",
+          "summary": "The default landing page — fetches notes server-side and renders the list.",
+          "file": "app/page.tsx",
+          "function": "Page",
+          "module": "app/page.tsx · Page()",
+          "language": "tsx",
+          "snippet_start": 5,
+          "snippet_end": 26,
+          "annotations": {
+            "1": "Async Server Component — runs on the server, never ships to the client.",
+            "5": "Direct DB call: no fetch, no API route, no extra hop.",
+            "12": "Suspense boundary lets the static shell render while notes stream in."
+          },
+          "group": "routing"
+        },
+        {
+          "id": "layout",
+          "icon": "🎨",
+          "title": "Root layout",
+          "summary": "Provides the HTML shell, font, and ThemeProvider. Runs once per session, not per route change.",
+          "file": "app/layout.tsx",
+          "function": "RootLayout",
+          "module": "app/layout.tsx · RootLayout()",
+          "language": "tsx",
+          "snippet_start": 8,
+          "snippet_end": 26,
+          "annotations": {
+            "4": "metadata export feeds Next.js's SEO defaults — no <Head> needed.",
+            "10": "Inter font hosted by Next — preloaded with display:swap to avoid FOIT."
+          },
+          "group": "routing"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "label": "Data fetching",
+      "color": "indigo",
+      "sections": [
+        {
+          "id": "fetch-notes",
+          "icon": "📥",
+          "title": "Note query",
+          "summary": "Drizzle ORM call wrapped in a memoised function so the layout and the page can both call it without double-querying.",
+          "file": "lib/notes.ts",
+          "function": "getNotes",
+          "module": "lib/notes.ts · getNotes()",
+          "language": "typescript",
+          "snippet_start": 5,
+          "snippet_end": 22,
+          "annotations": {
+            "1": "React's cache() ensures a single DB call per request — even across components.",
+            "8": "orderBy desc(updatedAt) — readers expect newest-first.",
+            "11": "limit 50 — avoids unbounded payloads on accounts with thousands of notes."
+          },
+          "group": "data"
+        }
+      ]
+    },
+    {
+      "id": "mutations",
+      "label": "Mutations",
+      "color": {
+        "text": "text-[#FF6B35]",
+        "border": "border-[#FF6B35]/30",
+        "bg": "bg-[#FF6B35]/5"
+      },
+      "sections": [
+        {
+          "id": "create-note",
+          "icon": "✏️",
+          "title": "Create note action",
+          "summary": "Server action invoked from the client form. Validates with Zod, writes via Drizzle, revalidates the cache.",
+          "file": "app/actions.ts",
+          "function": "createNote",
+          "module": "app/actions.ts · createNote()",
+          "language": "typescript",
+          "snippet_start": 8,
+          "snippet_end": 32,
+          "annotations": {
+            "1": "'use server' marks this file as server-only code reachable from the client by RPC.",
+            "5": "Zod parsing throws on invalid input — Next.js converts the throw into a structured form error.",
+            "14": "revalidatePath flushes the cached page so the new note appears immediately."
+          },
+          "group": "mutations"
+        }
+      ]
+    }
+  ]
+}

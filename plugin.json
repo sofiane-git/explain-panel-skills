@@ -1,0 +1,44 @@
+{
+  "$comment": "Claude Code plugin manifest. Distribution conventions may vary by client; this file is intentionally minimal and self-describing. See docs/install.md for publishing notes.",
+  "name": "explain-panel-kit",
+  "version": "1.0.0",
+  "description": "Two Claude skills that turn any codebase into a fully populated ExplainPanel documentation component for React/Next.js or Vue/Nuxt.",
+  "homepage": "https://github.com/sofiane-git/explain-panel-kit",
+  "license": "MIT",
+  "author": {
+    "name": "Sofiane Conan",
+    "url": "https://github.com/sofiane-git"
+  },
+  "schemaVersion": "1.0",
+  "skills": [
+    {
+      "name": "explore-pipeline",
+      "path": "skills/explore-pipeline",
+      "trigger": "/explore-pipeline",
+      "description": "Analyze any codebase and produce docs/pipeline-map.json"
+    },
+    {
+      "name": "explain-panel",
+      "path": "skills/explain-panel",
+      "trigger": "/explain-panel",
+      "description": "Generate an ExplainPanel component from docs/pipeline-map.json"
+    }
+  ],
+  "resources": [
+    {
+      "name": "pipeline-map-schema",
+      "path": "schemas/pipeline-map.schema.json",
+      "type": "json-schema",
+      "description": "Authoritative schema for pipeline-map.json files."
+    }
+  ],
+  "examples": [
+    "examples/fastapi-rag",
+    "examples/nextjs-app",
+    "examples/nuxt-app"
+  ],
+  "supportedClients": [
+    "claude-code >= 1.0",
+    "claude-cli"
+  ]
+}

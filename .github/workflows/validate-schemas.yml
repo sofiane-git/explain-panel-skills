@@ -1,0 +1,44 @@
+name: Validate schemas
+
+on:
+  pull_request:
+    paths:
+      - "schemas/**"
+      - "examples/**/docs/pipeline-map.json"
+      - "skills/**"
+      - ".github/workflows/validate-schemas.yml"
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install ajv-cli
+        run: npm install -g ajv-cli@5
+
+      - name: Validate schema syntax
+        run: ajv compile --spec=draft2020 -s schemas/pipeline-map.schema.json
+
+      - name: Validate all example maps
+        run: |
+          set -e
+          for map in examples/*/docs/pipeline-map.json ; do
+            echo "→ $map"
+            ajv validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d "$map"
+          done
+
+      - name: Verify schema version matches plugin.json
+        run: |
+          SCHEMA_CONST=$(jq -r '.properties.schemaVersion.const' schemas/pipeline-map.schema.json)
+          PLUGIN_V=$(jq -r '.schemaVersion' plugin.json)
+          if [ "$SCHEMA_CONST" != "$PLUGIN_V" ] ; then
+            echo "schemaVersion mismatch — schema says $SCHEMA_CONST, plugin.json says $PLUGIN_V"
+            exit 1
+          fi

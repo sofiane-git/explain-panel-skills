@@ -1,0 +1,106 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-kit/main/schemas/pipeline-map.schema.json",
+  "schemaVersion": "1.0",
+  "project": "Nuxt Recipes",
+  "framework": "nuxt",
+  "roots": ["."],
+  "header": {
+    "title": "How it works — full data flow",
+    "icon": "🍳"
+  },
+  "groups": [
+    {
+      "id": "pages",
+      "label": "Pages",
+      "color": "rose",
+      "sections": [
+        {
+          "id": "home-page",
+          "icon": "🏠",
+          "title": "Home page",
+          "summary": "File-based route at /. Uses useFetch to populate the recipe list — Nuxt handles SSR and hydration transparently.",
+          "file": "pages/index.vue",
+          "function": "default",
+          "module": "pages/index.vue · <script setup>",
+          "language": "vue",
+          "snippet_start": 1,
+          "snippet_end": 22,
+          "annotations": {
+            "3": "useFetch dedupes the call between SSR and client hydration — no double-fetch.",
+            "8": "pending and error refs come straight from the composable — no manual loading state.",
+            "14": "Suspense boundary handled automatically by Nuxt at the page level."
+          },
+          "group": "pages"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "label": "API",
+      "color": "amber",
+      "sections": [
+        {
+          "id": "recipes-handler",
+          "icon": "🥘",
+          "title": "Recipes Nitro handler",
+          "summary": "Server route handling GET /api/recipes. Reads from the KV store, applies a tag filter, returns JSON.",
+          "file": "server/api/recipes.get.ts",
+          "function": "default",
+          "module": "server/api/recipes.get.ts · defineEventHandler()",
+          "language": "typescript",
+          "snippet_start": 4,
+          "snippet_end": 28,
+          "annotations": {
+            "2": "defineEventHandler — Nitro's universal handler signature.",
+            "5": "getQuery — typed access to URL params, no parsing boilerplate.",
+            "12": "useStorage('kv') — driver-agnostic KV; backed by Cloudflare KV in production."
+          },
+          "group": "api"
+        },
+        {
+          "id": "create-handler",
+          "icon": "➕",
+          "title": "Create recipe handler",
+          "summary": "POST /api/recipes — validates with Valibot, writes to KV, broadcasts via the WebSocket hub.",
+          "file": "server/api/recipes.post.ts",
+          "function": "default",
+          "module": "server/api/recipes.post.ts · defineEventHandler()",
+          "language": "typescript",
+          "snippet_start": 6,
+          "snippet_end": 32,
+          "annotations": {
+            "3": "readValidatedBody combines body reading with Valibot parsing in one call.",
+            "10": "crypto.randomUUID() — Web Crypto API, available on both edge runtimes and Node.",
+            "16": "broadcast() pushes the new recipe to every connected client over WebSockets."
+          },
+          "group": "api"
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "label": "State",
+      "color": "teal",
+      "sections": [
+        {
+          "id": "favorites-store",
+          "icon": "⭐",
+          "title": "Favorites store (Pinia)",
+          "summary": "Pinia setup store storing favourite recipe ids in localStorage with reactive sync.",
+          "file": "stores/favorites.ts",
+          "function": "useFavoritesStore",
+          "module": "stores/favorites.ts · useFavoritesStore()",
+          "language": "typescript",
+          "snippet_start": 4,
+          "snippet_end": 28,
+          "annotations": {
+            "2": "Setup store — composable shape; lets us return reactive refs and methods together.",
+            "6": "useLocalStorage from VueUse — already debounces writes for us.",
+            "14": "computed isFavorite — reactive without explicit subscription, recomputes on Set changes."
+          },
+          "group": "state"
+        }
+      ]
+    }
+  ]
+}

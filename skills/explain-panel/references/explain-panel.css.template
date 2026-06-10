@@ -1,0 +1,209 @@
+/* ExplainPanel — plain CSS variant
+ * BEM naming. Colors come from CSS variables so themes are easy to swap.
+ * Each group's color set is exposed as --explain-color-<group-id>-{text,border,bg}.
+ *
+ * Placeholders: {{ GROUP_COLOR_VARS }} — one set of three custom properties per group.
+ */
+
+:root {
+  --explain-surface: #ffffff;
+  --explain-surface-muted: rgba(0, 0, 0, 0.05);
+  --explain-border: rgba(0, 0, 0, 0.1);
+  --explain-text: #525252;
+  --explain-text-strong: #1f2937;
+  --explain-accent: #6366f1;
+  --explain-accent-bg: rgba(99, 102, 241, 0.1);
+  --explain-annotation-bg: rgba(99, 102, 241, 0.15);
+{{ GROUP_COLOR_VARS }}
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --explain-surface: #171717;
+    --explain-surface-muted: rgba(255, 255, 255, 0.05);
+    --explain-border: rgba(255, 255, 255, 0.1);
+    --explain-text: #a3a3a3;
+    --explain-text-strong: #ffffff;
+  }
+}
+
+.explain-panel {
+  border-radius: 1rem;
+  border: 1px solid var(--explain-border);
+  background: var(--explain-surface);
+  overflow: hidden;
+}
+
+.explain-panel__header {
+  border-bottom: 1px solid var(--explain-border);
+  padding: 0.75rem 1rem;
+}
+
+.explain-panel__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #737373;
+  margin: 0;
+}
+
+.explain-panel__chips {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.explain-panel__chip {
+  border-radius: 9999px;
+  border: 1px solid;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+}
+
+.explain-panel__group-header {
+  border-bottom: 1px solid;
+  padding: 0.375rem 1rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.explain-panel__item {
+  border-top: 1px solid var(--explain-border);
+}
+
+.explain-panel__item:first-child {
+  border-top: none;
+}
+
+.explain-panel__button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--explain-text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+.explain-panel__button:hover {
+  background: var(--explain-surface-muted);
+}
+
+.explain-panel__button:focus-visible {
+  outline: 2px solid var(--explain-accent);
+  outline-offset: -2px;
+}
+
+.explain-panel__button--active {
+  background: var(--explain-accent-bg);
+  color: var(--explain-accent);
+}
+
+.explain-panel__icon {
+  flex-shrink: 0;
+}
+
+.explain-panel__labels {
+  flex: 1;
+  min-width: 0;
+}
+
+.explain-panel__module {
+  font-size: 0.625rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: #a3a3a3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.explain-panel__chevron {
+  font-size: 0.75rem;
+  transition: transform 200ms;
+  flex-shrink: 0;
+}
+
+.explain-panel__chevron--open {
+  transform: rotate(180deg);
+}
+
+.explain-panel__region {
+  display: grid;
+  transition: grid-template-rows 300ms, opacity 300ms;
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.explain-panel__region--open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.explain-panel__region-inner {
+  overflow: hidden;
+}
+
+.explain-panel__content {
+  padding: 0.5rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--explain-text);
+}
+
+.explain-panel__code-block {
+  position: relative;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-size: 0.6875rem;
+}
+
+.explain-panel__code-block pre {
+  margin: 0;
+  padding: 0.75rem;
+  background: #1e1e1e;
+  line-height: 1.6;
+}
+
+.explain-panel__code-block .line.annotated {
+  background: var(--explain-annotation-bg);
+  display: block;
+}
+
+.explain-panel__annotations {
+  background: #171717;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.explain-panel__annotation {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.625rem;
+}
+
+.explain-panel__annotation-line {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: #818cf8;
+}
+
+.explain-panel__annotation-note {
+  color: #a3a3a3;
+}

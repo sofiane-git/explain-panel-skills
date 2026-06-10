@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sofiane-git/explain-panel-kit/schemas/pipeline-map.schema.json",
+  "title": "Pipeline Map",
+  "description": "Structured description of a project's data flow, consumed by /explain-panel to generate an accordion documentation component.",
+  "type": "object",
+  "required": ["schemaVersion", "project", "framework", "groups"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional pointer to this schema file. Enables IDE autocomplete and inline validation."
+    },
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Required for forward compatibility. /explain-panel will refuse maps with unknown versions and direct the user to migrate/."
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable project name. Used in the generated component header."
+    },
+    "framework": {
+      "type": "string",
+      "enum": ["nextjs", "nuxt", "react", "vue", "fastapi", "django", "express", "rails", "other"],
+      "description": "Primary framework. Drives component generation target (TSX vs SFC) and syntax-highlighter language defaults."
+    },
+    "roots": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Workspace roots scanned during exploration. Single entry for non-monorepo projects, multiple for monorepos. Paths are relative to the repository root.",
+      "examples": [["."], ["app/", "web/"], ["packages/api/", "packages/web/", "packages/shared/"]]
+    },
+    "header": {
+      "type": "object",
+      "description": "Header text displayed at the top of the generated component. All fields optional — defaults are English.",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title shown above the group chips. Default: 'How it works — full data flow'."
+        },
+        "icon": {
+          "type": "string",
+          "description": "Single emoji prefixed to the title. Default: '📚'."
+        }
+      }
+    },
+    "groups": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/Group" },
+      "description": "Pipeline stages ordered chronologically. Each group contains 1–5 sections."
+    }
+  },
+  "$defs": {
+    "Group": {
+      "type": "object",
+      "required": ["id", "label", "color", "sections"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Unique kebab-case identifier."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Display name shown on the group chip and section divider."
+        },
+        "color": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["sky", "indigo", "amber", "emerald", "rose", "violet", "cyan", "fuchsia", "lime", "orange", "teal", "pink"],
+              "description": "Preset Tailwind color. Expands to text-{c}-500 border-{c}-500/30 bg-{c}-500/5."
+            },
+            {
+              "type": "object",
+              "required": ["text", "border", "bg"],
+              "additionalProperties": false,
+              "properties": {
+                "text": { "type": "string", "description": "CSS class or hex color for text." },
+                "border": { "type": "string", "description": "CSS class or hex color for border." },
+                "bg": { "type": "string", "description": "CSS class or hex color for background." }
+              },
+              "description": "Custom color object. Use when preset colors are exhausted or for brand colors."
+            }
+          ]
+        },
+        "sections": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/Section" }
+        }
+      }
+    },
+    "Section": {
+      "type": "object",
+      "required": ["id", "icon", "title", "file", "function", "module", "language", "snippet_start", "snippet_end"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Unique kebab-case identifier across all sections (not just within a group)."
+        },
+        "icon": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4,
+          "description": "Single emoji character (graphemes that render as one glyph allowed)."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Action-phrase title describing what the section's code does."
+        },
+        "summary": {
+          "type": "string",
+          "description": "Optional one-sentence prose summary rendered above the code snippet."
+        },
+        "file": {
+          "type": "string",
+          "description": "Path to the source file containing the snippet. Relative to repository root, regardless of which `roots` entry it lives under."
+        },
+        "function": {
+          "type": "string",
+          "description": "Name of the primary function/class/symbol the snippet illustrates. Used in audit checks and the `module` display string."
+        },
+        "module": {
+          "type": "string",
+          "description": "Display string shown in the section header. Conventionally `<file> · <function>()`."
+        },
+        "language": {
+          "type": "string",
+          "enum": ["python", "typescript", "tsx", "javascript", "jsx", "vue", "go", "rust", "ruby", "php", "java", "kotlin", "swift", "csharp", "sql", "bash", "yaml", "json", "html", "css", "markdown", "other"],
+          "description": "Source language. Drives syntax highlighting in the generated component."
+        },
+        "snippet_start": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "First line of the snippet within `file` (1-indexed, inclusive)."
+        },
+        "snippet_end": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Last line of the snippet within `file` (1-indexed, inclusive). Must be >= snippet_start. (snippet_end - snippet_start) should be between 14 and 34 for readability."
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Map of snippet-relative line numbers to explanatory notes. Line `1` is the first line of the snippet (NOT line `snippet_start` in the file). Each note should explain WHY the line exists, not WHAT it does. Keep notes under 200 characters for layout.",
+          "patternProperties": {
+            "^[0-9]+$": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 240
+            }
+          },
+          "additionalProperties": false
+        },
+        "group": {
+          "type": "string",
+          "description": "Group id this section belongs to. MUST match an id in the top-level `groups[]`. Optional in storage (derivable from nesting) but populated by /explore-pipeline for audit convenience."
+        }
+      }
+    }
+  }
+}
