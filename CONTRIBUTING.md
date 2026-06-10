@@ -12,8 +12,8 @@ Thanks for considering a contribution. This kit is intentionally small — two s
 ## Local development
 
 ```bash
-git clone https://github.com/sofiane-git/explain-panel-kit.git
-cd explain-panel-kit
+git clone https://github.com/sofiane-git/explain-panel-skills.git
+cd explain-panel-skills
 
 # Validate the schema and all example maps in one shot
 npx -y ajv-cli@5 validate -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'

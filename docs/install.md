@@ -5,9 +5,9 @@ Three ways to install the kit into your local Claude Code setup.
 ## Option 1 — Manual copy (simplest)
 
 ```bash
-git clone https://github.com/sofiane-git/explain-panel-kit.git
-cp -r explain-panel-kit/skills/explore-pipeline ~/.claude/skills/
-cp -r explain-panel-kit/skills/explain-panel    ~/.claude/skills/
+git clone https://github.com/sofiane-git/explain-panel-skills.git
+cp -r explain-panel-skills/skills/explore-pipeline ~/.claude/skills/
+cp -r explain-panel-skills/skills/explain-panel    ~/.claude/skills/
 ```
 
 Restart your Claude Code session. Both skills appear as `/explore-pipeline` and `/explain-panel`.
@@ -15,7 +15,7 @@ Restart your Claude Code session. Both skills appear as `/explore-pipeline` and 
 To update:
 
 ```bash
-cd explain-panel-kit && git pull
+cd explain-panel-skills && git pull
 rm -rf ~/.claude/skills/explore-pipeline ~/.claude/skills/explain-panel
 cp -r skills/explore-pipeline ~/.claude/skills/
 cp -r skills/explain-panel    ~/.claude/skills/
@@ -26,12 +26,12 @@ cp -r skills/explain-panel    ~/.claude/skills/
 If you want to pull updates without re-copying:
 
 ```bash
-git clone https://github.com/sofiane-git/explain-panel-kit.git ~/dev/explain-panel-kit
-ln -s ~/dev/explain-panel-kit/skills/explore-pipeline ~/.claude/skills/explore-pipeline
-ln -s ~/dev/explain-panel-kit/skills/explain-panel    ~/.claude/skills/explain-panel
+git clone https://github.com/sofiane-git/explain-panel-skills.git ~/dev/explain-panel-skills
+ln -s ~/dev/explain-panel-skills/skills/explore-pipeline ~/.claude/skills/explore-pipeline
+ln -s ~/dev/explain-panel-skills/skills/explain-panel    ~/.claude/skills/explain-panel
 ```
 
-`git pull` in `~/dev/explain-panel-kit` updates both skills atomically.
+`git pull` in `~/dev/explain-panel-skills` updates both skills atomically.
 
 ## Option 3 — Claude Code plugin marketplace
 
@@ -39,7 +39,7 @@ The repo ships a `plugin.json` declaring the two skills. If your distribution su
 
 ```bash
 # Claude Code (example — verify against your version's docs)
-claude plugin add github.com/sofiane-git/explain-panel-kit
+claude plugin add github.com/sofiane-git/explain-panel-skills
 ```
 
 The plugin loader reads `plugin.json`, copies both skills into the right location, and registers any required hooks. The manifest schema is documented in `plugin.json` inline comments.

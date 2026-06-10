@@ -1,13 +1,15 @@
-# explain-panel-kit
+# ExplainPanel Skills
 
 > Two Claude Code skills that turn any codebase into a beautiful, accordion-based "How it works" documentation panel — with syntax-highlighted code snippets, per-line annotations, and color-coded pipeline stages.
+
+> Package: `explain-panel-skills` · Repo: [`sofiane-git/explain-panel-skills`](https://github.com/sofiane-git/explain-panel-skills)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Schema: 1.0](https://img.shields.io/badge/schema-1.0-blue)](schemas/pipeline-map.schema.json)
 
 ## What it does
 
-`explain-panel-kit` ships two skills that work together:
+`explain-panel-skills` ships two skills that work together:
 
 1. **`/explore-pipeline`** — walks your codebase, identifies the data flow, and produces a structured `docs/pipeline-map.json` documenting groups → sections → code snippets.
 2. **`/explain-panel`** — reads the map, audits it against the live code, and generates a fully working `ExplainPanel.tsx` (React/Next.js) or `ExplainPanel.vue` (Nuxt/Vue) component.
@@ -34,9 +36,9 @@ Splitting exploration from generation has three benefits:
 Copy the two skill directories into your local Claude skills folder:
 
 ```bash
-git clone https://github.com/sofiane-git/explain-panel-kit.git
-cp -r explain-panel-kit/skills/explore-pipeline ~/.claude/skills/
-cp -r explain-panel-kit/skills/explain-panel    ~/.claude/skills/
+git clone https://github.com/sofiane-git/explain-panel-skills.git
+cp -r explain-panel-skills/skills/explore-pipeline ~/.claude/skills/
+cp -r explain-panel-skills/skills/explain-panel    ~/.claude/skills/
 ```
 
 Restart your Claude Code session — both skills become available as `/explore-pipeline` and `/explain-panel`.
@@ -127,7 +129,7 @@ Add this line at the top of your `pipeline-map.json` to get IDE autocomplete and
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-kit/main/schemas/pipeline-map.schema.json",
+  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-skills/main/schemas/pipeline-map.schema.json",
   "schemaVersion": "1.0",
   ...
 }

@@ -5,7 +5,7 @@ description: Map any project's data flow into a structured pipeline-map.json tha
 
 # Explore Pipeline
 
-Produce `docs/pipeline-map.json` describing the target project's data flow as a sequence of groups → sections. This is Phase 1 of the explain-panel-kit workflow; `/explain-panel` consumes the output to generate the documentation component.
+Produce `docs/pipeline-map.json` describing the target project's data flow as a sequence of groups → sections. This is Phase 1 of the explain-panel-skills workflow; `/explain-panel` consumes the output to generate the documentation component.
 
 The map MUST conform to `schemas/pipeline-map.schema.json` from this kit. The component generator validates against the schema and refuses non-conforming maps.
 

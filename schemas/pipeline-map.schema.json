@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sofiane-git/explain-panel-kit/schemas/pipeline-map.schema.json",
+  "$id": "https://github.com/sofiane-git/explain-panel-skills/schemas/pipeline-map.schema.json",
   "title": "Pipeline Map",
   "description": "Structured description of a project's data flow, consumed by /explain-panel to generate an accordion documentation component.",
   "type": "object",

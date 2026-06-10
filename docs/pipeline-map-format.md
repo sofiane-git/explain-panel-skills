@@ -6,7 +6,7 @@ This is the field-by-field reference for `docs/pipeline-map.json`. The authorita
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-kit/main/schemas/pipeline-map.schema.json",
+  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-skills/main/schemas/pipeline-map.schema.json",
   "schemaVersion": "1.0",
   "project": "Nauda Palisse — Veille Tech",
   "framework": "fastapi",
@@ -184,7 +184,7 @@ A minimal valid map with one group and one section:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-kit/main/schemas/pipeline-map.schema.json",
+  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-skills/main/schemas/pipeline-map.schema.json",
   "schemaVersion": "1.0",
   "project": "Tiny CLI",
   "framework": "other",

@@ -1,5 +1,5 @@
 {
-  "$comment": "Trigger evals for the two skills in explain-panel-kit. These exercise the should-trigger / should-not-trigger boundary of each skill's description. Run with skill-creator's run_loop.py to tune triggering accuracy.",
+  "$comment": "Trigger evals for the two skills in explain-panel-skills. These exercise the should-trigger / should-not-trigger boundary of each skill's description. Run with skill-creator's run_loop.py to tune triggering accuracy.",
   "version": "1.0",
   "explore_pipeline": {
     "skill_name": "explore-pipeline",

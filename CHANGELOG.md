@@ -5,7 +5,7 @@ All notable changes to this project will be documented here. Format follows [Kee
 ## [Unreleased]
 
 ### Added
-- Initial release of `explain-panel-kit`.
+- Initial release of `explain-panel-skills`.
 - `/explore-pipeline` skill: walks any codebase and produces `docs/pipeline-map.json`.
   - Monorepo detection via workspace manifests (npm/pnpm/yarn, Cargo, Pyproject, Lerna, Turbo, Nx).
   - Per-root entry-point probing for HTTP, full-stack, and CLI projects.
@@ -25,4 +25,4 @@ All notable changes to this project will be documented here. Format follows [Kee
 - Issue templates: bug report, feature request, schema-violation report.
 - Migration scaffold for future schema versions.
 
-[Unreleased]: https://github.com/sofiane-git/explain-panel-kit/compare/main...HEAD
+[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/main...HEAD

@@ -1,15 +1,15 @@
 {
-  "name": "explain-panel-kit",
+  "name": "explain-panel-skills",
   "version": "1.0.0",
   "description": "Two Claude Code skills (/explore-pipeline + /explain-panel) that turn any codebase into a syntax-highlighted, annotated accordion documentation component for React/Next.js or Vue/Nuxt.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sofiane-git/explain-panel-kit.git"
+    "url": "https://github.com/sofiane-git/explain-panel-skills.git"
   },
-  "homepage": "https://github.com/sofiane-git/explain-panel-kit#readme",
+  "homepage": "https://github.com/sofiane-git/explain-panel-skills#readme",
   "bugs": {
-    "url": "https://github.com/sofiane-git/explain-panel-kit/issues"
+    "url": "https://github.com/sofiane-git/explain-panel-skills/issues"
   },
   "keywords": [
     "claude-code",

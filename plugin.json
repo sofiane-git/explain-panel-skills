@@ -1,9 +1,9 @@
 {
   "$comment": "Claude Code plugin manifest. Distribution conventions may vary by client; this file is intentionally minimal and self-describing. See docs/install.md for publishing notes.",
-  "name": "explain-panel-kit",
+  "name": "explain-panel-skills",
   "version": "1.0.0",
   "description": "Two Claude skills that turn any codebase into a fully populated ExplainPanel documentation component for React/Next.js or Vue/Nuxt.",
-  "homepage": "https://github.com/sofiane-git/explain-panel-kit",
+  "homepage": "https://github.com/sofiane-git/explain-panel-skills",
   "license": "MIT",
   "author": {
     "name": "Sofiane Conan",
