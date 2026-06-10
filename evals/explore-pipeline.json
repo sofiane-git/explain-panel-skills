@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "should_trigger": true,
+    "query": "I just inherited this FastAPI codebase and I need to understand the data flow from ingestion to response. Can you walk through it and produce something I can share with the new junior dev next week?"
+  },
+  {
+    "id": 2,
+    "should_trigger": true,
+    "query": "We're publishing internal docs next quarter. I need a structured map of how our Nuxt app handles a typical request — pages, server routes, state — saved somewhere I can hand-edit before generating the visual."
+  },
+  {
+    "id": 3,
+    "should_trigger": true,
+    "query": "Run /explore-pipeline on this repo, the backend is in api/ and the front is in web/"
+  },
+  {
+    "id": 4,
+    "should_trigger": true,
+    "query": "Map out my project pipeline as JSON so I can hand it off to /explain-panel afterwards"
+  },
+  {
+    "id": 5,
+    "should_trigger": true,
+    "query": "Analyse my codebase end-to-end and write the result to docs/pipeline-map.json, I want to know what /explain-panel will see"
+  },
+  {
+    "id": 6,
+    "should_trigger": false,
+    "query": "Refactor my pipeline so it's faster — the embedding step is the bottleneck"
+  },
+  {
+    "id": 7,
+    "should_trigger": false,
+    "query": "Explain what RAG means and how cosine distance works in ChromaDB"
+  },
+  {
+    "id": 8,
+    "should_trigger": false,
+    "query": "Write tests for my ingestion pipeline so I can refactor it confidently"
+  },
+  {
+    "id": 9,
+    "should_trigger": false,
+    "query": "Why is my retrieval returning weird results? Looks like the embedding model changed"
+  },
+  {
+    "id": 10,
+    "should_trigger": false,
+    "query": "Document my API endpoints in OpenAPI format and publish them to Postman"
+  }
+]

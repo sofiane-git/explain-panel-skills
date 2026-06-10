@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "should_trigger": true,
+    "query": "I've already got docs/pipeline-map.json, now build the React component that visualises it. Tailwind is set up."
+  },
+  {
+    "id": 2,
+    "should_trigger": true,
+    "query": "Generate the explain panel component from the pipeline map I edited yesterday — it's in docs/. Use the Nuxt SFC variant."
+  },
+  {
+    "id": 3,
+    "should_trigger": true,
+    "query": "/explain-panel"
+  },
+  {
+    "id": 4,
+    "should_trigger": true,
+    "query": "Audit the pipeline map against the code, then create the accordion documentation panel for the project"
+  },
+  {
+    "id": 5,
+    "should_trigger": true,
+    "query": "Time to ship the explain UI — pull from docs/pipeline-map.json and drop the TSX into components/. Verify everything is in sync first."
+  },
+  {
+    "id": 6,
+    "should_trigger": true,
+    "query": "My project is pure FastAPI — no React, no Vue. Build me a standalone HTML documentation panel from the pipeline map I already generated."
+  },
+  {
+    "id": 7,
+    "should_trigger": false,
+    "query": "Refactor my ExplainPanel component to use Solid.js signals instead of React state"
+  },
+  {
+    "id": 8,
+    "should_trigger": false,
+    "query": "Style the ExplainPanel with a different color palette — make it more brand-aligned"
+  },
+  {
+    "id": 9,
+    "should_trigger": false,
+    "query": "My ExplainPanel renders but the syntax highlighter doesn't load. Debug it."
+  },
+  {
+    "id": 10,
+    "should_trigger": false,
+    "query": "Generate the pipeline map for this project — I haven't run /explore-pipeline yet"
+  },
+  {
+    "id": 11,
+    "should_trigger": false,
+    "query": "Convert this React component to Vue"
+  }
+]
