@@ -31,29 +31,39 @@ Splitting exploration from generation has three benefits:
 
 ## Installation
 
-### Manual install
+### Recommended — Claude Code marketplace (no clone)
 
-Copy the two skill directories into your local Claude skills folder:
+Inside any Claude Code session:
 
-```bash
-git clone https://github.com/sofiane-git/explain-panel-skills.git
-cp -r explain-panel-skills/skills/explore-pipeline ~/.claude/skills/
-cp -r explain-panel-skills/skills/explain-panel    ~/.claude/skills/
+```text
+/plugin marketplace add sofiane-git/explain-panel-skills
+/plugin install docpanel@explain-panel-skills
+/reload-plugins
 ```
 
-Restart your Claude Code session — both skills become available as `/explore-pipeline` and `/explain-panel`.
+Both skills are then available as:
 
-### Plugin install (Claude Code marketplace)
+```text
+/docpanel:explore-pipeline
+/docpanel:explain-panel
+```
 
-If your distribution supports plugin manifests, `plugin.json` at the repo root declares the two skills. See [docs/install.md](docs/install.md) for marketplace publishing notes.
+Plugin-distributed skills are namespaced (`<plugin>:<skill>`) to prevent collisions. The marketplace is named after the repo (`explain-panel-skills`) for discovery; the plugin itself uses the shorter `docpanel` namespace to keep invocations readable. You can also invoke skills by description ("explore the pipeline", "generate the explain panel") without typing the full namespaced name.
+
+### Alternative — manual copy / symlink
+
+For offline installs, forks, or active development on the skills themselves, copy the skill directories directly into `~/.claude/skills/`. Skills then appear without the namespace prefix (`/explore-pipeline`, `/explain-panel`).
+
+Full instructions, troubleshooting, and contributor workflow: [docs/install.md](docs/install.md).
 
 ## Usage
 
 ```bash
 # 1. From your project root — analyse the codebase
 /explore-pipeline
-# Answers a few questions about monorepo layout, primary framework, header language,
-# then writes docs/pipeline-map.json
+# Answers a few questions about monorepo layout, primary framework,
+# and header language (optional — defaults to English if you skip).
+# Writes docs/pipeline-map.json.
 
 # 2. Optionally hand-edit docs/pipeline-map.json to tighten titles, annotations, ordering.
 
@@ -63,7 +73,7 @@ If your distribution supports plugin manifests, `plugin.json` at the repo root d
 # then writes components/ExplainPanel.tsx (or .vue).
 ```
 
-Then import the component into a page:
+Then import the component into a page (React/Vue case):
 
 ```tsx
 import ExplainPanel from "@/components/ExplainPanel";
@@ -72,25 +82,71 @@ export default function Page() {
 }
 ```
 
+If no frontend is detected (FastAPI / Django / Rails / Go / Rust / library), step 3 writes `docs/ExplainPanel.html` instead — a single self-contained file. Open it directly via `file://`, serve it from your backend's static directory, or embed it into MkDocs/Docusaurus/Sphinx. No `import`, no `npm install`. See [Supported targets](#supported-targets) for the per-stack integration recipe.
+
+### Generating the panel in another language (French, Spanish, etc.)
+
+Every text string in the panel comes from `docs/pipeline-map.json` — the renderer never translates anything. Two paths depending on what you need:
+
+**Single-language panel (most common)** — write the map in your language.
+
+1. During `/explore-pipeline`, answer the "header language" question with your locale (the skill ships defaults for English, French, Spanish, German, Japanese — type anything else as free text).
+2. Write `header.title`, every `section.title` / `summary`, every `group.label`, and all `annotations` values in that language. UTF-8 free-form — no escaping.
+3. Run `/explain-panel`. The generated component embeds those strings literally — no extra config.
+
+Example (French — see [`examples/fastapi-rag/docs/pipeline-map.json`](examples/fastapi-rag/docs/pipeline-map.json) for a real one):
+
+```json
+{
+  "header": { "title": "Comment ça marche — flux de données complet", "icon": "📚" },
+  "groups": [
+    {
+      "id": "ingestion",
+      "label": "Ingestion",
+      "color": "sky",
+      "sections": [
+        { "title": "Récupération des articles", "summary": "Appelle NewsAPI…", "annotations": { "5": "Clé API lue depuis l'env" } }
+      ]
+    }
+  ]
+}
+```
+
+**Multi-language panel (rare)** — see [`docs/customization.md#i18n-beyond-the-header`](docs/customization.md#i18n-beyond-the-header). Short version: generate one map per locale (`pipeline-map.fr.json`, `pipeline-map.en.json`), produce one component per locale, switch on your app's current locale.
+
 ## Demo
 
-(GIF / screenshot here — coming with v1.0 release.)
+![ExplainPanel — three groups of an example FastAPI RAG pipeline, all sections expanded, with pre-highlighted Python and side-by-side per-line annotations](docs/media/demo.png)
 
-Live demo: <https://stackblitz.com/explain-panel-demo> (placeholder — to be added).
+The screenshot above is the HTML standalone variant rendered from [`examples/fastapi-rag/docs/pipeline-map.json`](examples/fastapi-rag/docs/pipeline-map.json) (header in French, three groups: *Ingestion*, *Indexation*, *Récupération*, all sections expanded).
+
+Want to interact with it locally? The pre-rendered file is checked in — open it in any browser:
+
+```bash
+open docs/media/demo.html        # macOS
+xdg-open docs/media/demo.html    # Linux
+```
+
+No build step, no `npm install` — it's the exact output `/explain-panel` produces for a backend-only project. Tab through the sections, press Enter/Space to toggle, Escape to close.
 
 ## Supported targets
 
 | Framework | Output | Status |
 |-----------|--------|--------|
-| Next.js (App Router) | `ExplainPanel.tsx` | ✅ |
-| Next.js (Pages Router) | `ExplainPanel.tsx` | ✅ |
-| React + Vite | `ExplainPanel.tsx` | ✅ |
-| Nuxt 3+ | `ExplainPanel.vue` | ✅ |
-| Vue 3 + Vite | `ExplainPanel.vue` | ✅ |
+| Next.js (App Router) | `components/ExplainPanel.tsx` | ✅ |
+| Next.js (Pages Router) | `components/ExplainPanel.tsx` | ✅ |
+| React + Vite | `components/ExplainPanel.tsx` | ✅ |
+| Nuxt 3+ | `components/ExplainPanel.vue` | ✅ |
+| Vue 3 + Vite | `components/ExplainPanel.vue` | ✅ |
+| **No frontend detected** (FastAPI, Django, Rails, Go, Rust, CLI, library) | **`docs/ExplainPanel.html`** — single self-contained file, zero runtime deps, pre-highlighted | ✅ |
 | Tailwind CSS | Inline classes | ✅ |
 | Plain CSS | BEM + companion `.css` | ✅ |
 | Other CSS frameworks (UnoCSS, CSS Modules) | Fallback to plain CSS | ✅ via `--mode=css` |
 | Svelte / Solid / Angular | — | not yet, contributions welcome |
+
+### The HTML standalone variant
+
+When no frontend framework is detected, `/explain-panel` automatically generates `docs/ExplainPanel.html`: a single ~50KB file containing inline CSS, native `<details>` accordions, and pre-highlighted code (no `highlight.js`, no CDN, no `npm install`). Open it directly via `file://`, serve it from FastAPI's `StaticFiles`, Django's `staticfiles`, Rails' `public/`, or paste it into MkDocs/Docusaurus/Sphinx as a raw HTML block. The visual matches the React/Vue variants (same accordion, same group colors, same line-annotation layout). Override with `--framework=react` or `--framework=vue` if you actually want a component file even though no frontend is detected.
 
 ## Supported source languages
 
@@ -102,13 +158,31 @@ Other languages are accepted via the `"other"` enum value with manual highlighti
 
 `/explore-pipeline` detects monorepos automatically via `package.json` workspaces, `pnpm-workspace.yaml`, `lerna.json`, `turbo.json`, `nx.json`, `Cargo.toml [workspace]`, and `pyproject.toml`. It then **asks you** which roots to include — never assumes. See [docs/monorepo.md](docs/monorepo.md) for the full detection logic.
 
+## Pipeline groups: you define them
+
+The examples use groups like `routing / data / mutations` (Next.js) or `ingestion / indexation / retrieval / generation` (FastAPI RAG). **These are not built-in categories.** They're the project author's choice of how to slice their own code into stages.
+
+The schema enforces only:
+
+- **1–8 groups** per map (`groups[]`), ordered chronologically.
+- **1–8 sections** per group (`groups[].sections[]`).
+- A unique `id` and a `color` (preset name or custom hex object) per group.
+
+Pick whatever group names match how *you* explain your project. `auth / billing / webhooks`, `read-path / write-path / background-jobs`, `parse / validate / store / serve` — all valid. `/explore-pipeline` proposes a starting set during the interview; you can override anything before the map is written.
+
+See [`docs/pipeline-map-format.md`](docs/pipeline-map-format.md#groups-array-required-18-items) for the full field reference.
+
+## Source framework ≠ output framework
+
+The panel renderer (React TSX or Vue SFC) is **decoupled** from the language of the code being documented. The FastAPI example documents Python and outputs React because the original project shipped a React frontend — it could just as well output Vue. Pick the panel variant that matches the UI stack of the app where you'll embed it, not the backend language of the code you're documenting.
+
 ## Examples
 
-Three reference projects with full `pipeline-map.json` + generated component:
+Three reference projects with full `pipeline-map.json` + generated component. They cover the matrix (back-only / full-stack-React / full-stack-Vue) rather than the full list of supported source frameworks — `/explore-pipeline` reads any codebase, so Django / Express / Rails / Spring etc. work without a dedicated example.
 
-- [`examples/fastapi-rag/`](examples/fastapi-rag/) — Python RAG pipeline (FastAPI + ChromaDB + Azure AI). Source for this kit's authoring story.
-- [`examples/nextjs-app/`](examples/nextjs-app/) — Next.js full-stack app with server actions.
-- [`examples/nuxt-app/`](examples/nuxt-app/) — Nuxt 3 site with Nitro API routes.
+- [`examples/fastapi-rag/`](examples/fastapi-rag/) — Python RAG pipeline (FastAPI + ChromaDB + Azure AI). Backend-only source, React output. Source for this kit's authoring story.
+- [`examples/nextjs-app/`](examples/nextjs-app/) — Next.js full-stack app. Backend = Server Actions + Route Handlers (no separate service). React output.
+- [`examples/nuxt-app/`](examples/nuxt-app/) — Nuxt 3 site. Backend = Nitro `server/api/*` handlers (no separate service). Vue SFC output + plain-CSS variant.
 
 ## Documentation
 

@@ -13,3 +13,9 @@ A small Next.js 14+ App Router app with server actions, demonstrating a frontend
 - TypeScript/TSX snippets.
 - 3 groups: routing / data / mutations.
 - Brand color override on the "mutations" group — demonstrates the custom color object form.
+
+## Notes on this example's choices
+
+- **Backend is included.** Next.js is full-stack: the `data` group documents Server Components doing DB reads (Drizzle), and the `mutations` group documents Server Actions (`'use server'`). There is no separate backend service to document.
+- **Groups are user-defined.** `routing / data / mutations` are this project's primary concerns. Your app might use `pages / api / auth / billing` instead. The schema allows any 1–8 group ids — see [`docs/pipeline-map-format.md`](../../docs/pipeline-map-format.md#groups-array-required-18-items).
+- **Output framework matches the source here** (React panel for a React app), but it doesn't have to. `/explain-panel` can generate a Vue panel from a Next.js codebase if that's what you want — the panel renderer is decoupled from the source.

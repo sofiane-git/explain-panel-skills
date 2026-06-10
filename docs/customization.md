@@ -2,6 +2,27 @@
 
 The generated `ExplainPanel` is meant to drop in as-is for 80% of projects. The remaining 20% — brand colors, translated headers, custom CSS — is what this page covers.
 
+## Defining your own groups
+
+There are no built-in group names. The examples ship with `routing / data / mutations` (Next.js), `pages / api / state` (Nuxt), and `ingestion / indexation / retrieval / generation` (FastAPI RAG) — those are author choices, not framework presets.
+
+Constraints from the schema:
+
+- **1–8 groups** per map.
+- **1–8 sections** per group.
+- Each group needs a unique `id` (kebab-case, used as JS identifier internally), a display `label`, a `color`, and a `sections[]` array.
+
+Pick group names that match how you'd actually explain the project to a new contributor — verbs of what the code does in chronological order. Examples that have worked well:
+
+- Backend services: `ingest / index / search / rank`
+- CRUD apps: `read-path / write-path / background-jobs`
+- E-commerce: `catalog / cart / checkout / webhooks`
+- Auth-heavy apps: `auth / session / authz / billing`
+
+`/explore-pipeline` proposes a starter set during the interview based on what it finds in the code. You can override every name before the map is written, and you can re-edit `docs/pipeline-map.json` at any time before running `/explain-panel`.
+
+Full field reference: [`pipeline-map-format.md`](pipeline-map-format.md#groups-array-required-18-items).
+
 ## Header text & icon
 
 Both are driven by `header.title` and `header.icon` in the map. Set them once during `/explore-pipeline` (the skill asks for them) or edit `pipeline-map.json` directly and re-run `/explain-panel`.
@@ -52,6 +73,25 @@ Tailwind's arbitrary-value syntax works for hex codes. If you're not on Tailwind
 ```
 
 then define those classes in your stylesheet.
+
+## Backend-only projects — the HTML standalone variant
+
+If your project has no frontend (pure FastAPI, Django, Rails, Go service, Rust CLI, library, etc.), `/explain-panel` skips the React/Vue templates and writes `docs/ExplainPanel.html` instead — a single self-contained file with inline CSS, native `<details>` accordions, and pre-highlighted code blocks. No `package.json`, no `npm install`, no CDN.
+
+How to use the generated file:
+
+| Context | What to do |
+|---|---|
+| Local preview | `open docs/ExplainPanel.html` (macOS) / `xdg-open` (Linux) — opens in the default browser via `file://`. |
+| FastAPI | `app.mount("/docs/panel", StaticFiles(directory="docs"), name="panel")` then visit `/docs/panel/ExplainPanel.html`. |
+| Django | Drop `docs/ExplainPanel.html` into a staticfiles directory or render via a thin view. |
+| Rails | Move to `public/explain-panel.html` and link from your docs nav. |
+| MkDocs / Docusaurus / Sphinx | Embed as a raw HTML block, or link directly. |
+| Forced regeneration as React/Vue even when no frontend exists | Re-run `/explain-panel` with `--framework=react` or `--framework=vue`. |
+
+The HTML uses the same six syntax-highlighting token classes (`hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`) as documented in `skills/explain-panel/references/html-pre-highlight.md`. To retheme: override the CSS variables declared at the top of the generated file (`--ep-bg`, `--ep-fg`, `--ep-hl-*`) in your own stylesheet, or edit them inline — the file is yours to touch.
+
+Built-in dark/light mode follows `prefers-color-scheme` — no toggle needed.
 
 ## CSS framework — Tailwind vs plain CSS
 

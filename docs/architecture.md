@@ -49,13 +49,13 @@ What it explicitly avoids: rendering anything visual, installing dependencies, t
 2. Audits every section against the live codebase (file exists, line range matches function, annotations in range, title coherent).
 3. Sweeps the codebase for important code missing from the map and surfaces candidates.
 4. Waits for user confirmation on every audit finding before generating.
-5. Detects target framework and CSS framework.
-6. Picks the right template, reads snippets fresh from source, escapes them safely.
-7. Installs the syntax highlighter dependency if missing.
-8. Substitutes placeholders into the template and writes the component.
-9. Type-checks the generated file.
+5. Detects target framework and CSS framework. If no frontend is detected, falls back to the **HTML standalone** variant — no question asked.
+6. Picks the right template, reads snippets fresh from source, escapes them safely. For HTML mode, also pre-tokenizes each snippet at generation time using the six-class scheme in `references/html-pre-highlight.md` (no runtime highlighter, no CDN).
+7. Installs the syntax highlighter dependency if missing (skipped for HTML mode — zero deps).
+8. Substitutes placeholders into the template and writes the component (`components/ExplainPanel.tsx`, `components/ExplainPanel.vue`, or `docs/ExplainPanel.html`).
+9. Validates the generated file (type-check for TSX/Vue, HTML parser + token-class audit for HTML).
 
-What it explicitly avoids: silently fixing drift, picking frameworks when ambiguous, overwriting existing files.
+What it explicitly avoids: silently fixing drift, picking frameworks when ambiguous, overwriting existing files. The HTML auto-fallback is **not** an ambiguity — it's the default when there's nothing to pick.
 
 ## The JSON contract
 
@@ -74,6 +74,7 @@ See [`docs/pipeline-map-format.md`](pipeline-map-format.md) for field-by-field r
 | Two skills instead of one | One extra invocation; in exchange we get a small reviewable artefact and a reusable map. |
 | JSON as the format | Less expressive than YAML; in exchange we get schema validation and IDE autocomplete out of the box. |
 | Tailwind as the default | Forces a dependency; in exchange the component fits visually in 80%+ of modern projects without extra work. Plain-CSS variant handles the rest. |
+| HTML standalone as the backend-only default | One more template to maintain (+ a per-language tokenization spec); in exchange, projects without any JS toolchain (FastAPI, Django, Rails, Go, Rust, CLIs) get a working panel out of the box with zero install, zero CDN, and zero runtime deps. |
 | Heavy audit before generation | Adds a confirmation step; in exchange we never silently ship stale docs. |
 | Snippet-relative annotations | Slightly awkward when extracting them from source; in exchange the rendered code block has stable line references regardless of where the snippet starts in the file. |
 

@@ -1,6 +1,6 @@
 ---
 name: explain-panel
-description: Generate a fully populated ExplainPanel accordion documentation component from docs/pipeline-map.json. Produces TSX (React/Next.js) or SFC (Vue/Nuxt), with syntax-highlighted code snippets, per-line annotations, color-coded pipeline stages, and full ARIA/keyboard support. Use when the user wants to generate, refresh, or rebuild the explain panel after running /explore-pipeline, or asks "build the documentation panel" / "generate the explain UI" / "create the ExplainPanel component". Runs a mandatory two-pass audit (JSON↔code cross-check + full codebase scan for missing modules) and waits for confirmation before generating.
+description: Generate a fully populated ExplainPanel accordion documentation component from docs/pipeline-map.json. Produces TSX (React/Next.js), Vue SFC (Vue/Nuxt), or a self-contained HTML file (backend-only projects: FastAPI, Django, Rails, Go, Rust, CLIs — auto-fallback when no frontend is detected, zero runtime deps). Includes syntax-highlighted code snippets, per-line annotations, color-coded pipeline stages, and full ARIA/keyboard support. Use when the user wants to generate, refresh, or rebuild the explain panel after running /explore-pipeline, or asks "build the documentation panel" / "generate the explain UI" / "create the ExplainPanel component" / "build standalone HTML docs for my backend". Runs a mandatory two-pass audit (JSON↔code cross-check + full codebase scan for missing modules) and waits for confirmation before generating.
 ---
 
 # Explain Panel
@@ -32,8 +32,10 @@ Use TaskCreate to track these phases. They run sequentially; each gate must pass
 Read `docs/pipeline-map.json`. Validate against the kit's `schemas/pipeline-map.schema.json`. If you do not have a JSON Schema validator handy:
 
 ```bash
-# preferred — fail fast on schema violations
-npx -y ajv-cli@5 validate -s <kit-path>/schemas/pipeline-map.schema.json -d docs/pipeline-map.json
+# preferred — fail fast on schema violations.
+# --spec=draft2020 is required: the schema declares draft/2020-12 in $schema,
+# but ajv-cli defaults to draft-07 and won't recognise that meta-schema URL.
+npx -y ajv-cli@5 validate --spec=draft2020 -s <kit-path>/schemas/pipeline-map.schema.json -d docs/pipeline-map.json
 ```
 
 If `ajv-cli` cannot be installed (offline, no network), perform manual checks for the required fields listed in the schema and proceed with caution.
@@ -119,14 +121,16 @@ Detect the project's frontend framework. Prefer the map's `framework` field; oth
 |--------|--------|
 | `framework === "nextjs" \|\| "react"` or `next.config.*` or `vite.config.* + App.tsx` | TSX (React variant) |
 | `framework === "nuxt" \|\| "vue"` or `nuxt.config.*` or `vite.config.* + App.vue` | Vue SFC |
-| Backend-only project (no `web/`, no frontend manifest) | Ask user: where should the component live? Or generate a standalone HTML/JS reference variant. |
+| **Backend-only project** (no frontend manifest detected: no `package.json` with `react`/`vue`/`@nuxt/*` deps, no `web/` or `client/` subdir with a JS framework) | **HTML standalone** — auto-fallback. Inform the user: "No frontend framework detected — generating a self-contained `docs/ExplainPanel.html` that opens in any browser or can be served from your backend's static directory. Pre-highlighted code, no runtime deps. Override by re-running with `--framework=react` or `--framework=vue` if you actually want a component file." Do NOT ask "where should it live" — the HTML variant has a sensible default. |
 | Other / ambiguous | Ask user |
 
-Detect CSS framework:
+Detect CSS framework (skip this step for HTML standalone):
 - `tailwindcss` in any `package.json` dep → use Tailwind classes
 - Otherwise → CSS-fallback mode (BEM classes + companion `.css` file)
 
-Detect target directory: prefer `components/` (Next.js, Nuxt, generic). If multiple frontend roots exist (monorepo), ask which one.
+Detect target directory:
+- React/Vue: prefer `components/` (Next.js, Nuxt, generic). Monorepo with multiple frontend roots → ask which one.
+- HTML standalone: write to `docs/ExplainPanel.html` at the repo root (alongside `docs/pipeline-map.json`). No directory ambiguity — backend-only projects always get a `docs/` dir from `/explore-pipeline`.
 
 ### Phase 4 — Read Snippets
 
@@ -139,7 +143,9 @@ If a file is missing despite passing audit (race with user edits), warn and skip
 
 ### Phase 5 — Install Dependencies
 
-Detect the package manager from lockfiles in the target frontend directory:
+**Skip this entire phase for HTML standalone mode** — the HTML variant has zero runtime deps and zero install step.
+
+For React/Vue variants, detect the package manager from lockfiles in the target frontend directory:
 
 ```bash
 if   test -f pnpm-lock.yaml ; then PM="pnpm add"
@@ -167,10 +173,13 @@ Pick the right template variant. Templates live in this skill's `references/` di
 | React/Next.js + plain CSS | `references/react-css.tsx.template` (companion `references/explain-panel.css.template`) |
 | Vue/Nuxt + Tailwind | `references/vue-tailwind.vue.template` |
 | Vue/Nuxt + plain CSS | `references/vue-css.vue.template` (companion `references/explain-panel.css.template`) |
+| Backend-only / HTML standalone | `references/html-standalone.html.template` (pair with `references/html-pre-highlight.md` for the per-language tokenization contract) |
 
 Read the template, then substitute the placeholders listed inside it. Placeholders use `{{ NAME }}` syntax; the template file documents every placeholder and what to fill it with.
 
-**Color expansion:** Preset color names in the map expand as follows. Pre-compute the expansion for every group before writing the file.
+**HTML standalone — pre-highlighting:** For the HTML variant, the snippet inside each `<pre><code>` block is pre-tokenized at generation time (no runtime highlighter, no CDN). Follow `references/html-pre-highlight.md` for the exact rules: six token classes (`hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`), per-language matchers, HTML-escaping order, and the sanity checklist. **Never** invent classes outside the six listed there; the template only styles those. When in doubt, leave the token plain — under-coloring is acceptable, mis-coloring is not.
+
+**Color expansion (React/Vue only):** Preset color names in the map expand as follows. Pre-compute the expansion for every group before writing the file.
 
 ```ts
 const PRESET = (c: string) =>
@@ -181,18 +190,23 @@ const PRESET = (c: string) =>
 
 For custom color objects, concatenate `${color.text} ${color.border} ${color.bg}` into a single class string.
 
+For the **HTML standalone** variant, expand preset colors to actual hex values directly (`sky` → `#0ea5e9`, `indigo` → `#6366f1`, `amber` → `#f59e0b`, `emerald` → `#10b981`, `rose` → `#f43f5e`, `violet` → `#8b5cf6`, `cyan` → `#06b6d4`, `fuchsia` → `#d946ef`, `lime` → `#84cc16`, `orange` → `#f97316`, `teal` → `#14b8a6`, `pink` → `#ec4899`). Inject the hex on the chip element via `style="color: <hex>"`. For custom color objects in the map, use the `text` field's hex (or extract from any Tailwind-style arbitrary-value string `text-[#...]`).
+
 **Header text:** read `header.title` and `header.icon` from the map. Fall back to defaults (English) only if both are missing.
 
 **Output path:**
 - React: `<frontend-root>/components/ExplainPanel.tsx`
 - Vue: `<frontend-root>/components/ExplainPanel.vue`
 - CSS fallback: also write `<frontend-root>/components/ExplainPanel.css` from the companion template.
+- **HTML standalone:** `docs/ExplainPanel.html` at the repo root (alongside the existing `docs/pipeline-map.json`).
 
 If the file exists, ask before overwriting.
 
 ### Phase 7 — Validation
 
-Run before reporting:
+Run before reporting.
+
+**React/Vue variants:**
 
 - [ ] Generated file parses (type-check):
   - React: `npx tsc --noEmit <generated file>` (or full project `tsc --noEmit` if isolation isn't easy)
@@ -206,7 +220,18 @@ Run before reporting:
 
 If type-check fails, attempt to fix obvious issues (missing comma, stray `;`, wrong template literal escape). If still failing after one repair attempt, surface the errors to the user.
 
+**HTML standalone variant:**
+
+- [ ] File opens without errors when validated with a quick parse: `python3 -c "import html.parser, pathlib; html.parser.HTMLParser().feed(pathlib.Path('docs/ExplainPanel.html').read_text())"` (the parser doesn't enforce strict HTML, but it surfaces unclosed tags and bad escapes).
+- [ ] Every snippet line became exactly one `<span class="ep-line">…</span>` (count lines in source ≡ count of `ep-line` spans).
+- [ ] No `hl-…` class other than the six declared in `references/html-pre-highlight.md` is present (`grep -oE 'class="hl-[a-z-]+"' docs/ExplainPanel.html | sort -u` should only contain `hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`).
+- [ ] All `<`, `>`, `&` in code content are HTML-escaped (`&lt;`, `&gt;`, `&amp;`) — except inside `<span class="…">` tags themselves.
+- [ ] Every annotation line number has a matching `is-annotated` line in the corresponding section's snippet.
+- [ ] Native `<details>`/`<summary>` keyboard (Tab + Enter) works, and the inline `<script>` adds Escape-to-close. No CDN, no other `<script>` tags.
+
 ### Phase 8 — Report
+
+**React/Vue variants:**
 
 ```
 ✅ ExplainPanel generated
@@ -225,6 +250,27 @@ Usage:
 Next: import the component into a page and view it locally.
 ```
 
+**HTML standalone variant:**
+
+```
+✅ ExplainPanel generated (HTML standalone — zero runtime deps)
+   File: docs/ExplainPanel.html
+   Framework: <detected source framework> → HTML (no frontend detected)
+   Sections: <N> (groups: <list>)
+   Highlighted: <N> snippets, <M> token spans (classes: hl-kw, hl-str, hl-num, hl-com, hl-fn, hl-attr)
+   ARIA: native <details>/<summary>
+   Keyboard: Escape closes (inline script), Tab + Enter native
+
+Usage:
+   - Local preview: open docs/ExplainPanel.html
+   - FastAPI:       app.mount("/docs/panel", StaticFiles(directory="docs"), name="panel")
+   - Django:        place in any staticfiles directory
+   - Rails:         move to public/explain-panel.html
+   - MkDocs/Sphinx: embed as a raw HTML block, or link directly
+
+Next: open the file in your browser to verify the layout, then wire it into your project's docs flow.
+```
+
 ---
 
 ## What This Skill WILL NOT Do
@@ -234,6 +280,7 @@ Next: import the component into a page and view it locally.
 - **Will not overwrite the existing file** silently.
 - **Will not hardcode language** — header text comes from the map.
 - **Will not assume Tailwind** — detects CSS framework and falls back to BEM + companion CSS.
+- **Will not assume a frontend** — if none is detected, generates a self-contained `docs/ExplainPanel.html` (zero runtime deps, pre-highlighted, opens in any browser). Does not ask the user to pick a framework when there's nothing to pick.
 
 ## When to Ask the User
 
