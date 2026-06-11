@@ -4,25 +4,24 @@ name: Validate
 permissions:
   contents: read
 
+# No path filters on pull_request: all four jobs are *required status checks*
+# on the protected main branch. A path-filtered job that doesn't run never
+# reports its check, which would leave the PR stuck on "Expected — waiting
+# for status" forever. The full suite costs <1 min — run it on every PR.
 on:
   pull_request:
-    paths:
-      - "schemas/**"
-      - "examples/**/docs/pipeline-map.json"
-      - "examples/**/docs/ExplainPanel.html"
-      - "skills/**"
-      - ".claude-plugin/**"
-      - "package.json"
-      - "docs/install.md"
-      - "docs/media/demo.html"
-      - ".github/workflows/validate-schemas.yml"
   push:
     branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   schema:
     name: Pipeline-map schema
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
@@ -57,6 +56,7 @@ jobs:
   plugin:
     name: Plugin + marketplace manifests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
@@ -101,6 +101,7 @@ jobs:
   templates:
     name: HTML template + demo syntax
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
@@ -191,6 +192,7 @@ jobs:
   components:
     name: Example components compile
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
