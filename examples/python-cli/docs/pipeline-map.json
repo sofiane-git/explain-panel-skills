@@ -1,0 +1,90 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sofiane-git/explain-panel-skills/main/schemas/pipeline-map.schema.json",
+  "schemaVersion": "1.0",
+  "project": "Python CLI — News-to-RAG indexer",
+  "framework": "other",
+  "roots": ["."],
+  "header": {
+    "title": "Comment ça marche — flux de données complet",
+    "icon": "📚"
+  },
+  "groups": [
+    {
+      "id": "ingestion",
+      "label": "Ingestion",
+      "color": "sky",
+      "sections": [
+        {
+          "id": "news-api-ingest",
+          "icon": "📥",
+          "title": "NewsAPI Ingester",
+          "summary": "Pulls articles from NewsAPI for one or more topics, deduplicates by sha256, and merges tags when an article matches multiple topics.",
+          "file": "src/ingest/news_api.py",
+          "function": "run",
+          "module": "src/ingest/news_api.py · NewsApiIngester.run()",
+          "language": "python",
+          "snippet_start": 1,
+          "snippet_end": 23,
+          "annotations": {
+            "5": "Dedup by sha256(title+source) — re-ingesting the same article produces the same id, upsert is idempotent.",
+            "10": "Tag fusion: an article retrieved via both Python and AI/ML topics inherits both tags.",
+            "18": "page_size=100 is the NewsAPI free-tier maximum.",
+            "21": "Truncate dates to YYYY-MM-DD — NewsAPI rejects timezone-aware values."
+          },
+          "group": "ingestion"
+        }
+      ]
+    },
+    {
+      "id": "indexation",
+      "label": "Indexation",
+      "color": "indigo",
+      "sections": [
+        {
+          "id": "chroma",
+          "icon": "🧭",
+          "title": "ChromaDB client & cosine space",
+          "summary": "Single shared HNSW collection configured with cosine similarity — the architectural decision that drives every downstream distance computation.",
+          "file": "src/rag/chroma_client.py",
+          "function": "get_collection",
+          "module": "src/rag/chroma_client.py · get_collection()",
+          "language": "python",
+          "snippet_start": 1,
+          "snippet_end": 16,
+          "annotations": {
+            "1": "lru_cache(maxsize=1): one HTTP client for the whole process lifetime.",
+            "11": "hnsw:space='cosine' — without this, ChromaDB defaults to L2 (Euclidean), which behaves differently for variable-length text.",
+            "15": "HNSW is a logarithmic-time graph index — fast lookup across millions of vectors."
+          },
+          "group": "indexation"
+        }
+      ]
+    },
+    {
+      "id": "retrieval",
+      "label": "Récupération",
+      "color": "amber",
+      "sections": [
+        {
+          "id": "rag",
+          "icon": "🔎",
+          "title": "Vector search (RAG)",
+          "summary": "Embeds the expanded query, asks ChromaDB for the 8 nearest neighbours by cosine distance, and returns content + metadata + distance.",
+          "file": "src/rag/retrieval.py",
+          "function": "retrieve",
+          "module": "src/rag/retrieval.py · retrieve()",
+          "language": "python",
+          "snippet_start": 1,
+          "snippet_end": 20,
+          "annotations": {
+            "4": "embed() — Azure AI Inference, same model used at ingest time. Symmetry matters.",
+            "7": "n_results=k — ChromaDB always returns k, distances tell you whether to trust them.",
+            "9": "Distances must be requested explicitly — they're not in the default include set.",
+            "16": "Truncate to 2000 chars before embedding — avoid the model's token cap silently."
+          },
+          "group": "retrieval"
+        }
+      ]
+    }
+  ]
+}
