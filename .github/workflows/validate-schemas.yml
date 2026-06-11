@@ -5,6 +5,7 @@ on:
     paths:
       - "schemas/**"
       - "examples/**/docs/pipeline-map.json"
+      - "examples/**/docs/ExplainPanel.html"
       - "skills/**"
       - ".claude-plugin/**"
       - "package.json"
@@ -24,18 +25,15 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install ajv-cli
-        run: npm install -g ajv-cli@5
-
       - name: Validate schema syntax
-        run: ajv compile --spec=draft2020 -s schemas/pipeline-map.schema.json
+        run: npx -y ajv-cli@5 compile --spec=draft2020 -s schemas/pipeline-map.schema.json
 
       - name: Validate all example maps
         run: |
           set -e
           for map in examples/*/docs/pipeline-map.json ; do
             echo "→ $map"
-            ajv validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d "$map"
+            npx -y ajv-cli@5 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d "$map"
           done
 
       - name: Examples declare current schema version
@@ -123,10 +121,26 @@ jobs:
           if p.errs:
               print("HTML parser errors:", p.errs); sys.exit(1)
 
-          required = ["{{ ICON }}", "{{ HEADER_TITLE }}", "{{ GROUP_SECTIONS_BLOCKS }}", "{{ LANG }}"]
+          required = ["{{ ICON }}", "{{ HEADER_TITLE }}", "{{ GROUP_SECTIONS_BLOCKS }}", "{{ LANG }}", "{{ FOOTER_NOTE_BLOCK }}"]
           missing = [r for r in required if r not in tpl]
           if missing:
               print("Template missing placeholders:", missing); sys.exit(1)
+
+          # Every {{ NAME }} placeholder in the template body must also be documented
+          # in the leading {{! ... }} doc block. Catches doc/body drift early.
+          # The doc block opens with "{{!" and closes with "}}" alone on its own line —
+          # this lets the doc body itself contain literal "{{ NAME }}" examples
+          # without prematurely terminating the comment.
+          doc_match = re.search(r"\{\{!(.*?)^\}\}\s*$", tpl, flags=re.S | re.M)
+          if not doc_match:
+              print("Template missing leading {{! ... }} doc block"); sys.exit(1)
+          doc_block = doc_match.group(1)
+          body = tpl[doc_match.end():]
+          body_placeholders = set(re.findall(r"\{\{\s*([A-Z_]+)\s*\}\}", body))
+          doc_placeholders = set(re.findall(r"\{\{\s*([A-Z_]+)\s*\}\}", doc_block))
+          undocumented = body_placeholders - doc_placeholders
+          if undocumented:
+              print("Template uses placeholders not documented in doc block:", sorted(undocumented)); sys.exit(1)
 
           print("HTML standalone template OK")
           PY
@@ -147,3 +161,15 @@ jobs:
               print(p.errs); sys.exit(1)
           print("demo.html parses OK")
           PY
+
+      - name: python-cli example HTML matches the live demo
+        # README claims examples/python-cli/docs/ExplainPanel.html is the exact file
+        # embedded as the live demo. Enforce that invariant — if either copy drifts,
+        # one of them is wrong, and a contributor needs to refresh the other.
+        run: |
+          if ! diff -q examples/python-cli/docs/ExplainPanel.html docs/media/demo.html > /dev/null ; then
+            echo "::error::examples/python-cli/docs/ExplainPanel.html diverged from docs/media/demo.html. Re-sync both."
+            diff -u examples/python-cli/docs/ExplainPanel.html docs/media/demo.html | head -80
+            exit 1
+          fi
+          echo "python-cli HTML ≡ demo.html OK"

@@ -248,7 +248,7 @@ Write 5–10 annotations per snippet, keyed by **snippet-relative line numbers**
 
 ### Phase 7 — Decide Header Text
 
-Default header is French: title `"Comment ça marche — flux de données complet"`, icon `📚`. If the project audience is clearly different (check README language, dominant language in code comments), ask: "What language is the project audience? I'll pick a header in that language or you can supply your own."
+If `header.title` / `header.icon` are left unset, the renderer falls back to the values declared in the `default` keyword of those properties in `schemas/pipeline-map.schema.json` (currently French — read the schema for the authoritative literal; do not duplicate it here). If the project audience is clearly different (check README language, dominant language in code comments), ask: "What language is the project audience? I'll pick a header in that language or you can supply your own."
 
 Common headers:
 - French: "Comment ça marche — flux de données complet"

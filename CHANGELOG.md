@@ -6,6 +6,22 @@ All notable changes to this project will be documented here. Format follows [Kee
 
 (No unreleased changes.)
 
+## [1.1.0] — 2026-06-11
+
+### Changed
+- **Default panel header language switched from English to French.** `/explore-pipeline` and `/explain-panel` now fall back to `"Comment ça marche — flux de données complet"` (icon `📚`) when `header.title` and `header.icon` are missing. Maps that explicitly set `header.title` are unaffected. Users relying on the English fallback should add an explicit `header.title` to their `pipeline-map.json`.
+- Documentation consistency pass: HTML standalone variant now mentioned in `README.md`, `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`; demo file size corrected (~17 KB); eval harness path documented in PR template.
+
+### Fixed
+- `README.md`: usage block no longer claims English default for the header language prompt.
+- `skills/explain-panel/references/html-standalone.html.template`: docstring placeholder name aligned with template body (`{{ FOOTER_NOTE_BLOCK }}`).
+- `skills/explain-panel/SKILL.md`: HTML standalone template + pre-highlight reference now listed under Bundled Resources; HTML-escape reminder for `title` / `summary` / `annotations` added to Phase 6; XSS scan in Phase 7 extended to detect `<iframe>`, `<object>`, `<embed>`, `<svg>` injection in addition to `<script>` and event-handler attributes.
+- `.github/PULL_REQUEST_TEMPLATE.md`: schema-validation command no longer assumes `pnpm`.
+
+### Added
+- `SECURITY.md` — supported-versions matrix and private vulnerability reporting channel.
+- CI: HTML standalone template placeholder doc/body drift check.
+
 ## [1.0.0] — 2026-06-11
 
 ### Added
@@ -25,11 +41,12 @@ All notable changes to this project will be documented here. Format follows [Kee
   - Custom color objects (`{ text, border, bg }`) supported alongside 12 preset Tailwind colors.
 - Plugin distribution via `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json`. Install with `/plugin marketplace add sofiane-git/explain-panel-skills` then `/plugin install docpanel@explain-panel-skills` — no git clone required. Skills become `/docpanel:explore-pipeline` and `/docpanel:explain-panel` under the short `docpanel` namespace.
 - JSON Schema 2020-12 at `schemas/pipeline-map.schema.json` (schema version `1.0`).
-- Three example projects: `examples/fastapi-rag`, `examples/nextjs-app`, `examples/nuxt-app`.
+- Four example projects: `examples/fastapi-rag`, `examples/nextjs-app`, `examples/nuxt-app`, `examples/python-cli` (HTML standalone auto-fallback demo).
 - Documentation: architecture, format reference, customization, monorepo detection, migration guide.
 - CI workflows: schema validation on PRs.
 - Issue templates: bug report, feature request, schema-violation report.
 - Migration scaffold for future schema versions.
 
-[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/sofiane-git/explain-panel-skills/releases/tag/v1.0.0

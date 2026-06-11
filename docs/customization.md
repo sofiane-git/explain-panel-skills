@@ -34,7 +34,7 @@ Both are driven by `header.title` and `header.icon` in the map. Set them once du
 }
 ```
 
-The kit ships defaults for French (default), English, Spanish, German, and Japanese in `/explore-pipeline`. For other languages, type your own when prompted.
+The kit ships in-skill prompt defaults for French, English, Spanish, German, and Japanese (`/explore-pipeline` proposes the right header per locale). The fallback when both `header.title` and `header.icon` are missing comes from the `default` keyword on those fields in [`schemas/pipeline-map.schema.json`](../schemas/pipeline-map.schema.json) (currently French — the schema is the single source of truth). For other languages, type your own when prompted.
 
 ## Group colors
 
@@ -92,6 +92,18 @@ How to use the generated file:
 The HTML uses the same six syntax-highlighting token classes (`hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`) as documented in `skills/explain-panel/references/html-pre-highlight.md`. To retheme: override the CSS variables declared at the top of the generated file (`--ep-bg`, `--ep-fg`, `--ep-hl-*`) in your own stylesheet, or edit them inline — the file is yours to touch.
 
 Built-in dark/light mode follows `prefers-color-scheme` — no toggle needed.
+
+## Bundle size
+
+The three output variants have very different runtime costs. Pick with eyes open:
+
+| Variant | Runtime deps | Approx min+gz | Notes |
+|---|---|---|---|
+| HTML standalone | none | ~5 KB CSS + ~17 KB total file | Zero JS dependencies. Pre-tokenized at generation time. Best for backend-only projects and static-doc embeds. |
+| React + Tailwind | `react-syntax-highlighter` (Prism) | ~80–110 KB after tree-shake; full bundle ~500 KB unshaken | Tree-shakes well in Next.js / Vite when importing only `Prism` and the specific style. Avoid importing `react-syntax-highlighter/dist/esm/styles/prism` of unused themes. |
+| Vue + Tailwind / CSS | `shiki` | ~70–150 KB after lazy-loading languages; full bundle ~1 MB if you ship every language | Lazy-load language grammars (`shiki.loadLanguage('python')` on demand) — do **not** ship the full Shiki language bundle. |
+
+If runtime cost is a concern on a project where a frontend *is* detected, you can still get the HTML standalone variant: temporarily remove or rename `package.json` (or run `/explain-panel` from a sibling backend-only directory) so the detection in Phase 3 falls through to the HTML auto-fallback. The resulting `docs/ExplainPanel.html` has zero JS deps and can be embedded as a static asset in any meta-framework.
 
 ## CSS framework — Tailwind vs plain CSS
 

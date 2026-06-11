@@ -53,11 +53,11 @@ Workspace roots that were analysed. Single entry for non-monorepo projects, mult
 
 ### `header.title` (string, optional)
 
-Title shown at the top of the rendered component. Defaults to `"Comment ça marche — flux de données complet"` (French). Use this for i18n.
+Title shown at the top of the rendered component. The default literal is declared on this field's `default` keyword in [`schemas/pipeline-map.schema.json`](../schemas/pipeline-map.schema.json) (currently French — the schema is the single source of truth, so this page does not duplicate the string). Override by setting `header.title` to any UTF-8 string for i18n.
 
 ### `header.icon` (string, optional)
 
-Single emoji prefixed to the title. Defaults to `📚`.
+Single emoji prefixed to the title. Default is declared on the schema field's `default` keyword (see above).
 
 <a id="groups"></a>
 ### `groups[]` (array, required, 1–8 items)

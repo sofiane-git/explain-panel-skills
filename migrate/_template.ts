@@ -1,8 +1,7 @@
-#!/usr/bin/env -S npx tsx
 /**
  * Migrator template. Copy to v<old>-to-v<new>.ts and adapt.
  *
- * Usage:
+ * Usage (no shebang — invoke via npx tsx for portability across BSD/GNU envs):
  *   npx tsx migrate/v<old>-to-v<new>.ts <input-path> [--stdout]
  *
  * Convention:

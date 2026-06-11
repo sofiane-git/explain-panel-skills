@@ -179,7 +179,7 @@ The panel renderer (React TSX or Vue SFC) is **decoupled** from the language of 
 
 ## Examples
 
-Three reference projects with full `pipeline-map.json` + generated component. They cover the matrix (back-only / full-stack-React / full-stack-Vue) rather than the full list of supported source frameworks — `/explore-pipeline` reads any codebase, so Django / Express / Rails / Spring etc. work without a dedicated example.
+Four reference projects with full `pipeline-map.json` + generated component. They cover the output matrix (React TSX / Vue SFC / HTML standalone) rather than the full list of supported source frameworks — `/explore-pipeline` reads any codebase, so Django / Express / Rails / Spring etc. work without a dedicated example.
 
 - [`examples/fastapi-rag/`](examples/fastapi-rag/) — Python RAG pipeline (FastAPI + ChromaDB + Azure AI). Backend-only source, React output (the original project shipped a React frontend). Source for this kit's authoring story.
 - [`examples/nextjs-app/`](examples/nextjs-app/) — Next.js full-stack app. Backend = Server Actions + Route Handlers (no separate service). React output.
@@ -212,6 +212,8 @@ Add this line at the top of your `pipeline-map.json` to get IDE autocomplete and
   ...
 }
 ```
+
+The URL points at `main` on purpose, not a tagged release: the **`schemaVersion`** field is the real compatibility contract — the schema on `main` only ever adds optional fields or relaxes constraints within a major version, and breaking changes bump the major + ship a migrator under [`migrate/`](migrate/). If you prefer a frozen URL, pin to a tag: `…/v1.1.0/schemas/pipeline-map.schema.json`.
 
 ## Contributing
 

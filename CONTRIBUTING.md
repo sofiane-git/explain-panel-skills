@@ -68,12 +68,22 @@ When the html-standalone template's structure changes (new placeholder, new sect
 - Markdown links inside skills must be relative (`./references/foo.md`), not absolute.
 - Generated code in templates uses Tailwind class strings verbatim — no `@apply`, no class abstractions, so the component is portable without a `tailwind.config.js` import.
 
+## XSS / sanitization invariants
+
+Three trust boundaries in the generated output, do not erode them:
+
+1. **HTML standalone variant** (`html-standalone.html.template`). The skill itself escapes `header`, `title`, `summary`, `module`, `label`, and `annotations` before substitution — see `skills/explain-panel/SKILL.md` Phase 6. The Phase 7 grep is a defense-in-depth scan, not the primary defense. If you add a new placeholder to the template, add the escape step in the SKILL and the new tag/attribute to the Phase 7 scan in the same PR.
+2. **Vue variants** (`vue-tailwind.vue.template`, `vue-css.vue.template`). The templates use `v-html` to render shiki's pre-rendered highlighted HTML. Trust boundary = shiki's own escaping of source code. If you bump shiki, pin a known-good version in the install instructions and check shiki's changelog for sanitizer regressions. Do not expand `v-html` usage to render any string that did not come straight out of shiki.
+3. **React variants**. JSX auto-escapes text content. Never reach for `dangerouslySetInnerHTML` — if you think you need it, pre-escape and use plain text, or push the formatting into the schema as structured data.
+
 ## Reporting bugs
 
 Open an issue using the bug-report template. Attach:
 - Your `pipeline-map.json` (minimal reproducer if possible).
 - The exact error or behaviour observed.
 - Your project layout (top-level `ls`).
+
+**Security issues** — do not open a public issue. Follow [`SECURITY.md`](SECURITY.md) for the private reporting channel.
 
 ## Reviewer checklist
 

@@ -36,20 +36,22 @@
     },
     "header": {
       "type": "object",
-      "description": "Header text displayed at the top of the generated component. All fields optional — defaults are French.",
+      "description": "Header text displayed at the top of the generated component. All fields optional — when missing, the renderer falls back to the `default` values declared on each property below (currently French — single source of truth).",
       "additionalProperties": false,
       "properties": {
         "title": {
           "type": "string",
           "minLength": 1,
           "maxLength": 300,
-          "description": "Title shown above the group chips. Default: 'Comment ça marche — flux de données complet'."
+          "default": "Comment ça marche — flux de données complet",
+          "description": "Title shown above the group chips."
         },
         "icon": {
           "type": "string",
           "minLength": 1,
           "maxLength": 4,
-          "description": "Single emoji prefixed to the title. Default: '📚'."
+          "default": "📚",
+          "description": "Single emoji prefixed to the title."
         }
       }
     },

@@ -14,7 +14,7 @@
 ## Reviewer checklist
 
 - [ ] CHANGELOG entry under `## [Unreleased]`.
-- [ ] Schema validation passes on all examples (`pnpm run validate:schema`).
+- [ ] Schema validation passes on all examples (`npm run validate:schema`, or `npx -y ajv-cli@5 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'`).
 - [ ] If schema changed, `migrate/v<old>-to-v<new>.ts` added and examples bumped through it.
 - [ ] If templates changed, example components regenerated.
 - [ ] If a new framework was added, an `examples/<framework>-app/` came with this PR.

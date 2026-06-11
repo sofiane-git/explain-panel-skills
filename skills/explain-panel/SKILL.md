@@ -179,6 +179,8 @@ Read the template, then substitute the placeholders listed inside it. Placeholde
 
 **HTML standalone — pre-highlighting:** For the HTML variant, the snippet inside each `<pre><code>` block is pre-tokenized at generation time (no runtime highlighter, no CDN). Follow `references/html-pre-highlight.md` for the exact rules: six token classes (`hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`), per-language matchers, HTML-escaping order, and the sanity checklist. **Never** invent classes outside the six listed there; the template only styles those. When in doubt, leave the token plain — under-coloring is acceptable, mis-coloring is not.
 
+**HTML standalone — escape every user-controlled string before injection.** `header.title`, `header.icon`, every `section.title` / `summary` / `module`, every `group.label`, and every value in `annotations` must be HTML-escaped (`&` → `&amp;`, `<` → `&lt;`, `>` → `&gt;`, `"` → `&quot;` when injected into an attribute) before being substituted into the template. The schema bounds string length and rejects path-traversal in `file`, but it does **not** sanitize HTML — that is this skill's responsibility. Skipping the escape lets a malicious or hand-edited map inject `<script>`, `<iframe srcdoc>`, `<svg onload>`, or event-handler attributes into the rendered file. The Phase 7 XSS scan is the safety net, not the primary defense.
+
 **Color expansion (React/Vue only):** Preset color names in the map expand as follows. Pre-compute the expansion for every group before writing the file.
 
 ```ts
@@ -192,7 +194,7 @@ For custom color objects, concatenate `${color.text} ${color.border} ${color.bg}
 
 For the **HTML standalone** variant, expand preset colors to actual hex values directly (`sky` → `#0ea5e9`, `indigo` → `#6366f1`, `amber` → `#f59e0b`, `emerald` → `#10b981`, `rose` → `#f43f5e`, `violet` → `#8b5cf6`, `cyan` → `#06b6d4`, `fuchsia` → `#d946ef`, `lime` → `#84cc16`, `orange` → `#f97316`, `teal` → `#14b8a6`, `pink` → `#ec4899`). Inject the hex on the chip element via `style="color: <hex>"`. For custom color objects in the map, use the `text` field's hex (or extract from any Tailwind-style arbitrary-value string `text-[#...]`).
 
-**Header text:** read `header.title` and `header.icon` from the map. Fall back to defaults (French: `"Comment ça marche — flux de données complet"`, icon `📚`) only if both are missing.
+**Header text:** read `header.title` and `header.icon` from the map. If either is missing, fall back to the value declared under that property's `default` keyword in `schemas/pipeline-map.schema.json` (single source of truth — do not hardcode a literal string here; if you find yourself typing one, the schema default has drifted).
 
 **Output path:**
 - React: `<frontend-root>/components/ExplainPanel.tsx`
@@ -228,7 +230,11 @@ If type-check fails, attempt to fix obvious issues (missing comma, stray `;`, wr
 - [ ] All `<`, `>`, `&` in code content are HTML-escaped (`&lt;`, `&gt;`, `&amp;`) — except inside `<span class="…">` tags themselves.
 - [ ] Every annotation line number has a matching `is-annotated` line in the corresponding section's snippet.
 - [ ] Native `<details>`/`<summary>` keyboard (Tab + Enter) works, and the inline `<script>` adds Escape-to-close. No CDN, no other `<script>` tags.
-- [ ] **Output XSS scan**: `grep -cE '<script|javascript:|[[:space:]\"'\'']on[a-z]+[[:space:]]*=' docs/ExplainPanel.html` returns at most `1` (the single inline Escape-key handler `<script>` at the bottom of the template). Any other match means an unescaped payload from `title`/`summary`/`annotations`/`module` slipped through — re-escape the offending field and regenerate. The schema rejects path-traversal and bounds string lengths, but it cannot enforce HTML-escape of the contents themselves, so this scan is the last line of defense. The `[[:space:]"']on[a-z]+[[:space:]]*=` clause requires an event-handler attribute to actually begin at an attribute boundary (after whitespace or a quote), which avoids false positives on words containing `on` like `content=` or `connection=`.
+- [ ] **Output XSS scan** (two passes):
+  1. `grep -cE '<script|javascript:|[[:space:]\"'\'']on[a-z]+[[:space:]]*=' docs/ExplainPanel.html` returns at most `1` (the single inline Escape-key handler `<script>` at the bottom of the template).
+  2. `grep -cE '<(iframe|object|embed|svg|math|link|meta|base|form)\b' docs/ExplainPanel.html` returns `0`. These tags can host script-equivalent payloads (`<iframe srcdoc>`, `<svg onload>`, `<math href>`) and are never emitted by the template itself.
+
+  Any other match means an unescaped payload from `title`/`summary`/`annotations`/`module`/`label` slipped through — re-escape the offending field and regenerate. The schema rejects path-traversal in `file` and bounds string lengths, but it cannot enforce HTML-escape of free-form content, so these scans are the last line of defense. The `[[:space:]"']on[a-z]+[[:space:]]*=` clause requires an event-handler attribute to actually begin at an attribute boundary (after whitespace or a quote), which avoids false positives on words containing `on` like `content=` or `connection=`.
 
 ### Phase 8 — Report
 
@@ -304,6 +310,8 @@ The `references/` directory next to this SKILL.md contains:
 - `vue-tailwind.vue.template` — full Vue SFC template, Tailwind variant.
 - `vue-css.vue.template` — full Vue SFC template, plain CSS variant.
 - `explain-panel.css.template` — CSS companion for the `-css` variants.
+- `html-standalone.html.template` — full HTML template for the backend-only auto-fallback variant.
+- `html-pre-highlight.md` — per-language tokenization spec for the HTML variant (six token classes, escaping rules).
 - `keyboard-handler.md` — escape/keyboard logic shared by both frameworks.
 
 Read templates with the `Read` tool when you reach Phase 6.

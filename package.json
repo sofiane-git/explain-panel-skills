@@ -1,6 +1,6 @@
 {
   "name": "explain-panel-skills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Two Claude Code skills (/explore-pipeline + /explain-panel) that turn any codebase into a syntax-highlighted, annotated accordion documentation component for React/Next.js, Vue/Nuxt, or a self-contained HTML file (zero runtime deps, auto-fallback for backend-only projects).",
   "license": "MIT",
   "repository": {
@@ -35,10 +35,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "validate:schema": "ajv validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'"
-  },
-  "devDependencies": {
-    "ajv-cli": "^5.0.0"
+    "validate:schema": "npx -y ajv-cli@5 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'"
   },
   "engines": {
     "node": ">=18"

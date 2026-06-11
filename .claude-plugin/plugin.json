@@ -1,7 +1,7 @@
 {
   "name": "docpanel",
   "description": "Two Claude Code skills that turn any codebase into a fully populated ExplainPanel documentation component for React/Next.js, Vue/Nuxt, or a self-contained HTML file (auto-fallback for backend-only projects — zero runtime deps).",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Sofiane Conan"
   },
