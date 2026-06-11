@@ -53,5 +53,15 @@
     "id": 11,
     "should_trigger": false,
     "query": "Convert this React component to Vue"
+  },
+  {
+    "id": 12,
+    "should_trigger": false,
+    "query": "My docs/ExplainPanel.html already exists — just swap the pre-highlighted snippets for highlight.js loaded from a CDN"
+  },
+  {
+    "id": 13,
+    "should_trigger": false,
+    "query": "Write a standalone HTML page that visualises my API contract from this OpenAPI spec"
   }
 ]
