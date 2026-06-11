@@ -1,6 +1,6 @@
 {
   "name": "explain-panel-skills",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Two Claude Code skills (/explore-pipeline + /explain-panel) that turn any codebase into a syntax-highlighted, annotated accordion documentation component for React/Next.js, Vue/Nuxt, or a self-contained HTML file (zero runtime deps, auto-fallback for backend-only projects).",
   "license": "MIT",
   "repository": {
