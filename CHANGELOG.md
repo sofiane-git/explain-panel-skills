@@ -9,7 +9,7 @@ All notable changes to this project will be documented here. Format follows [Kee
 - CI runs on **every** PR: `pull_request` path filters removed — a path-filtered job that doesn't run never reports its required status check, deadlocking the PR on "Expected — waiting for status". Added workflow-level `concurrency` (cancels superseded runs) and `timeout-minutes: 10` per job.
 
 ### Added
-- Claude Code guardrail: committed PreToolUse hook (`.claude/hooks/protect-main.sh` + `.claude/settings.json`) that denies `git commit` / `git push` from local `main` (tag-only pushes excepted, per the release runbook) and any push targeting a `main` refspec. Applies to every Claude Code session in this repo; GitHub branch protection remains the server-side gate.
+- Claude Code guardrail: committed PreToolUse hook (`.claude/hooks/protect-main.sh` + `.claude/settings.json`) that denies `git commit` / `git push` from local `main` (tag-only pushes excepted, per the release runbook) and any push targeting a `main` refspec. Applies to every Claude Code session in this repo; GitHub branch protection remains the server-side gate. The hook runs on every Bash call (no `if` prefix filter — a compound command like `npm test && git push origin main` doesn't start with `git`; the script fast-exits on non-git commands instead).
 
 ## [1.1.1] — 2026-06-11
 
