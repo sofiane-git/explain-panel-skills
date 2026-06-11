@@ -18,7 +18,7 @@
 - [ ] If schema changed, `migrate/v<old>-to-v<new>.ts` added and examples bumped through it.
 - [ ] If templates changed, example components regenerated.
 - [ ] If a new framework was added, an `examples/<framework>-app/` came with this PR.
-- [ ] Trigger evals (`evals/evals.json`) still pass — no regression in either skill's description.
+- [ ] Trigger evals (`evals/explore-pipeline.json` + `evals/explain-panel.json`) still pass — no regression in either skill's description. See `evals/README.md` for the harness invocation.
 
 ## Notes for the reviewer
 

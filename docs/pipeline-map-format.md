@@ -53,7 +53,7 @@ Workspace roots that were analysed. Single entry for non-monorepo projects, mult
 
 ### `header.title` (string, optional)
 
-Title shown at the top of the rendered component. Defaults to `"How it works — full data flow"` (English). Use this for i18n.
+Title shown at the top of the rendered component. Defaults to `"Comment ça marche — flux de données complet"` (French). Use this for i18n.
 
 ### `header.icon` (string, optional)
 
@@ -221,4 +221,4 @@ A minimal valid map with one group and one section:
 1. Validate this against the schema.
 2. Audit `main.py` lines 12–28 to make sure `main` is defined there.
 3. Sweep `.` for other entry points and ask whether you want them added.
-4. On approval, write `components/ExplainPanel.tsx` (or `.vue`).
+4. On approval, write `docs/ExplainPanel.html` — this map declares `framework: "other"` and no React/Vue manifest exists in the worked-example repo, so the skill takes its HTML auto-fallback path (zero runtime deps, pre-highlighted, opens in any browser). For a TSX or Vue SFC output instead, re-run with `--framework=react` or `--framework=vue`.

@@ -12,14 +12,14 @@
 `explain-panel-skills` ships two skills that work together:
 
 1. **`/explore-pipeline`** — walks your codebase, identifies the data flow, and produces a structured `docs/pipeline-map.json` documenting groups → sections → code snippets.
-2. **`/explain-panel`** — reads the map, audits it against the live code, and generates a fully working `ExplainPanel.tsx` (React/Next.js) or `ExplainPanel.vue` (Nuxt/Vue) component.
+2. **`/explain-panel`** — reads the map, audits it against the live code, and generates a fully working `ExplainPanel.tsx` (React/Next.js), `ExplainPanel.vue` (Vue/Nuxt), or `docs/ExplainPanel.html` (auto-fallback when no frontend is detected — details in [Demo](#demo) and [Supported targets](#supported-targets)).
 
-The generated component is an accordion sidebar with:
+The generated output is an accordion sidebar with:
 - syntax-highlighted code snippets (15–35 lines each)
 - per-line annotations explaining the **why** behind the code
 - color-coded pipeline stages (groups)
 - full ARIA support and keyboard navigation (Tab / Enter / Escape)
-- Tailwind or plain CSS variants
+- Tailwind or plain CSS variants (React/Vue); inline CSS with custom-property theming (HTML standalone)
 
 ## Why two skills?
 
@@ -70,7 +70,8 @@ Full instructions, troubleshooting, and contributor workflow: [docs/install.md](
 # 3. Generate the component
 /explain-panel
 # Audits the map against the live code, asks you to confirm any drift,
-# then writes components/ExplainPanel.tsx (or .vue).
+# then writes components/ExplainPanel.tsx (or .vue) — or docs/ExplainPanel.html
+# if no frontend framework is detected (auto-fallback for backend-only projects).
 ```
 
 Then import the component into a page (React/Vue case):
@@ -116,9 +117,9 @@ Example (French — see [`examples/fastapi-rag/docs/pipeline-map.json`](examples
 
 ## Demo
 
-![ExplainPanel — three groups of an example FastAPI RAG pipeline, all sections expanded, with pre-highlighted Python and side-by-side per-line annotations](docs/media/demo.png)
+![ExplainPanel — three groups of an example FastAPI RAG pipeline with pre-highlighted Python and side-by-side per-line annotations](docs/media/demo.png)
 
-The screenshot above is the HTML standalone variant rendered from [`examples/fastapi-rag/docs/pipeline-map.json`](examples/fastapi-rag/docs/pipeline-map.json) (header in French, three groups: *Ingestion*, *Indexation*, *Récupération*, all sections expanded).
+The screenshot above is the HTML standalone variant rendered from [`examples/fastapi-rag/docs/pipeline-map.json`](examples/fastapi-rag/docs/pipeline-map.json) (header in French, three groups: *Ingestion*, *Indexation*, *Récupération*). The screenshot was taken after manually expanding each section; the live file opens with sections collapsed — click any summary (or press Enter/Space when focused) to expand.
 
 Want to interact with it locally? The pre-rendered file is checked in — open it in any browser:
 
@@ -146,7 +147,7 @@ No build step, no `npm install` — it's the exact output `/explain-panel` produ
 
 ### The HTML standalone variant
 
-When no frontend framework is detected, `/explain-panel` automatically generates `docs/ExplainPanel.html`: a single ~50KB file containing inline CSS, native `<details>` accordions, and pre-highlighted code (no `highlight.js`, no CDN, no `npm install`). Open it directly via `file://`, serve it from FastAPI's `StaticFiles`, Django's `staticfiles`, Rails' `public/`, or paste it into MkDocs/Docusaurus/Sphinx as a raw HTML block. The visual matches the React/Vue variants (same accordion, same group colors, same line-annotation layout). Override with `--framework=react` or `--framework=vue` if you actually want a component file even though no frontend is detected.
+When no frontend framework is detected, `/explain-panel` automatically generates `docs/ExplainPanel.html`: a single ~17 KB file containing inline CSS, native `<details>` accordions, and pre-highlighted code (no `highlight.js`, no CDN, no `npm install`). Open it directly via `file://`, serve it from FastAPI's `StaticFiles`, Django's `staticfiles`, Rails' `public/`, or paste it into MkDocs/Docusaurus/Sphinx as a raw HTML block. The visual matches the React/Vue variants (same accordion, same group colors, same line-annotation layout). Override with `--framework=react` or `--framework=vue` if you actually want a component file even though no frontend is detected.
 
 ## Supported source languages
 
@@ -196,7 +197,7 @@ Three reference projects with full `pipeline-map.json` + generated component. Th
 | [`docs/customization.md`](docs/customization.md) | Colors (preset + custom), header text, CSS overrides, extending the schema |
 | [`docs/monorepo.md`](docs/monorepo.md) | How `roots[]` works, how detection runs, when to override |
 | [`docs/migration.md`](docs/migration.md) | Upgrading between schema versions |
-| [`docs/install.md`](docs/install.md) | Marketplace publishing notes (advanced) |
+| [`docs/install.md`](docs/install.md) | Install paths (marketplace, manual copy, symlink), troubleshooting, and marketplace publishing notes |
 
 ## Schema
 

@@ -14,7 +14,7 @@ Use this example to see the input → output mapping for backend-only projects w
 - `framework: "other"` — explicit signal that this project has no recognised frontend.
 - 3 groups (`ingestion / indexation / retrieval`), one section each. Lighter than `fastapi-rag` so the resulting HTML stays small for casual inspection.
 - French header text — proves the i18n optionality with a non-English locale.
-- All four token-class families (`hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`) appear at least once across the snippets.
+- All six token-class families (`hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`) appear at least once across the snippets.
 
 ## Notes on this example's choices
 
