@@ -35,7 +35,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "validate:schema": "npx -y ajv-cli@5 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'"
+    "validate:schema": "npx -y ajv-cli@5.0.0 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'"
   },
   "engines": {
     "node": ">=18"

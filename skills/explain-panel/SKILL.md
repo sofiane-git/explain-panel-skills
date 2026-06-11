@@ -35,7 +35,7 @@ Read `docs/pipeline-map.json`. Validate against the kit's `schemas/pipeline-map.
 # preferred — fail fast on schema violations.
 # --spec=draft2020 is required: the schema declares draft/2020-12 in $schema,
 # but ajv-cli defaults to draft-07 and won't recognise that meta-schema URL.
-npx -y ajv-cli@5 validate --spec=draft2020 -s <kit-path>/schemas/pipeline-map.schema.json -d docs/pipeline-map.json
+npx -y ajv-cli@5.0.0 validate --spec=draft2020 -s <kit-path>/schemas/pipeline-map.schema.json -d docs/pipeline-map.json
 ```
 
 If `ajv-cli` cannot be installed (offline, no network), perform manual checks for the required fields listed in the schema and proceed with caution.
@@ -62,7 +62,10 @@ For every section:
 Scan the entire workspace (using `roots[]` from the map) to find code that should probably be documented but isn't in the map. Use compatible search patterns — fall back to `grep`/`find` if `rg` isn't installed:
 
 ```bash
-ROOTS=$(jq -r '.roots[]' docs/pipeline-map.json | tr '\n' ' ')
+# roots[] is optional in the schema — default to "." when absent so the greps
+# below never run without a path operand (BSD grep -r without one reads stdin).
+ROOTS=$(jq -r '.roots[]? // empty' docs/pipeline-map.json | tr '\n' ' ')
+[ -z "$ROOTS" ] && ROOTS="."
 
 # 1. Route definitions / event handlers
 ( command -v rg >/dev/null && rg -l '@app\.|@router\.|app\.(get|post|put|delete|patch)|router\.(get|post)|defineEventHandler|createRouter' $ROOTS \
@@ -230,9 +233,10 @@ If type-check fails, attempt to fix obvious issues (missing comma, stray `;`, wr
 - [ ] All `<`, `>`, `&` in code content are HTML-escaped (`&lt;`, `&gt;`, `&amp;`) — except inside `<span class="…">` tags themselves.
 - [ ] Every annotation line number has a matching `is-annotated` line in the corresponding section's snippet.
 - [ ] Native `<details>`/`<summary>` keyboard (Tab + Enter) works, and the inline `<script>` adds Escape-to-close. No CDN, no other `<script>` tags.
-- [ ] **Output XSS scan** (two passes):
+- [ ] **Output XSS scan** (three passes):
   1. `grep -cE '<script|javascript:|[[:space:]\"'\'']on[a-z]+[[:space:]]*=' docs/ExplainPanel.html` returns at most `1` (the single inline Escape-key handler `<script>` at the bottom of the template).
-  2. `grep -cE '<(iframe|object|embed|svg|math|link|meta|base|form)\b' docs/ExplainPanel.html` returns `0`. These tags can host script-equivalent payloads (`<iframe srcdoc>`, `<svg onload>`, `<math href>`) and are never emitted by the template itself.
+  2. `grep -cE '<(iframe|object|embed|svg|math|link|base|form)\b' docs/ExplainPanel.html` returns `0`. These tags can host script-equivalent payloads (`<iframe srcdoc>`, `<svg onload>`, `<math href>`) and are never emitted by the template itself.
+  3. `grep -cE '<meta\b' docs/ExplainPanel.html` returns exactly `2` — the template's own `<meta charset>` and `<meta name="viewport">` in `<head>`, nothing more. A third `<meta>` (e.g. `<meta http-equiv="refresh">`) means an injected payload.
 
   Any other match means an unescaped payload from `title`/`summary`/`annotations`/`module`/`label` slipped through — re-escape the offending field and regenerate. The schema rejects path-traversal in `file` and bounds string lengths, but it cannot enforce HTML-escape of free-form content, so these scans are the last line of defense. The `[[:space:]"']on[a-z]+[[:space:]]*=` clause requires an event-handler attribute to actually begin at an attribute boundary (after whitespace or a quote), which avoids false positives on words containing `on` like `content=` or `connection=`.
 

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, type ReactNode } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import python from "react-syntax-highlighter/dist/esm/languages/prism/python";
+
+SyntaxHighlighter.registerLanguage("python", python);
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

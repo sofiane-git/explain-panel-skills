@@ -1,8 +1,15 @@
 {{!
 Placeholders (substitute every {{ NAME }} before writing the file):
 
-- {{ HEADER_ICON }}           Emoji from header.icon. Default: 📚
-- {{ HEADER_TITLE }}          String from header.title. Default: "How it works — full data flow"
+- {{ HEADER_ICON }}           Emoji from header.icon. When missing in the map, use the `default`
+                              declared on header.icon in schemas/pipeline-map.schema.json (single
+                              source of truth — do not hardcode a literal here).
+- {{ HEADER_TITLE }}          String from header.title. When missing in the map, use the `default`
+                              declared on header.title in schemas/pipeline-map.schema.json.
+- {{ PRISM_LANGUAGE_IMPORTS }}        One import line per distinct `language` used in the map, e.g.
+                                      'import python from "react-syntax-highlighter/dist/esm/languages/prism/python";'
+- {{ PRISM_LANGUAGE_REGISTRATIONS }}  One registerLanguage call per imported language, e.g.
+                                      'SyntaxHighlighter.registerLanguage("python", python);'
 - {{ SECTION_ID_UNION }}      TS union of all section ids, e.g. "ingest" | "scraper" | "chroma"
 - {{ GROUP_ID_UNION }}        TS union of all group ids
 - {{ GROUP_LABELS_ENTRIES }}  One line per group: '"group-id": { label: "Label", color: "<expanded-classes>" },'
@@ -14,12 +21,20 @@ Notes:
 - Backticks and ${ inside snippet text must be escaped to \` and \${ when filling CODE_ constants.
 - Each annotations record uses snippet-relative line numbers (line 1 = first line of the snippet).
 - The component is self-contained: no path aliases, all Tailwind classes inlined.
+- PrismLight + per-language registration keeps the bundle small: the root `Prism` export
+  ships every Prism grammar (~500 KB min). Only register what the map actually uses.
+  Language names map 1:1 to react-syntax-highlighter's prism language files
+  (python, typescript, tsx, javascript, jsx, go, rust, ruby, php, java, kotlin, swift,
+  csharp, sql, bash, yaml, json, markup, css, markdown).
 }}
 "use client";
 
 import { useState, useEffect, useRef, type ReactNode } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+{{ PRISM_LANGUAGE_IMPORTS }}
+
+{{ PRISM_LANGUAGE_REGISTRATIONS }}
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

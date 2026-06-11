@@ -23,12 +23,12 @@ The skills run inside the user's local Claude Code session — they have whateve
 In-scope concerns:
 
 - **HTML injection in generated `docs/ExplainPanel.html`** (the standalone variant). The schema validates `pipeline-map.json` against JSON Schema 2020-12 and rejects path-traversal in `file` fields, but free-form strings (`title`, `summary`, `annotations`, `label`, `module`, `icon`) are not HTML-sanitized at the schema level. `/explain-panel` must HTML-escape these before substitution — see `skills/explain-panel/SKILL.md` Phase 6 and the Phase 7 XSS scan for the contract.
-- **Path-traversal via `file` field**. The schema enforces `^[A-Za-z0-9_./\-]+$` and rejects `..` to prevent maps from making `/explain-panel` read files outside the repo.
+- **Path-traversal via `file` or `roots[]` fields**. The schema enforces `^[A-Za-z0-9_./\-]+$` and rejects both `..` sequences and absolute paths (leading `/`) on `file` and on every `roots[]` entry, to prevent maps from making `/explain-panel` read or scan files outside the repo.
 - **Snippet content injected into React/Vue templates**. Backticks and `${` are escaped before embedding into TS/JS template literals — see `SKILL.md` Phase 4.
 
 Out of scope:
 
-- Vulnerabilities in `react-syntax-highlighter`, `shiki`, `ajv-cli`, or other downstream dependencies — report those upstream. We track CVEs and bump pinned versions when they affect this project.
+- Vulnerabilities in `react-syntax-highlighter`, `shiki`, `ajv-cli`, or other downstream dependencies — report those upstream. This kit itself ships no runtime dependencies; `react-syntax-highlighter` / `shiki` are installed into the *user's* project at whatever version their package manager resolves, and only `ajv-cli` is invoked by the skills (pinned to `5.0.0` in CI and docs). When an upstream advisory affects the generated components, we update the install instructions and document it in the CHANGELOG.
 - Local code-execution risks in the user's own source code that the skills happen to read. The skills do not execute analysed code.
 - Vulnerabilities in Claude Code itself — report to Anthropic.
 

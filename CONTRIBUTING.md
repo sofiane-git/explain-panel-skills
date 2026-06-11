@@ -20,7 +20,7 @@ cd explain-panel-skills
 # $schema: …/draft/2020-12/schema, and ajv-cli defaults to draft-07,
 # which doesn't know that meta-schema URL. Without the flag you'll see
 # "no schema with key or ref 'https://json-schema.org/draft/2020-12/schema'".
-npx -y ajv-cli@5 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'
+npx -y ajv-cli@5.0.0 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'
 ```
 
 ## Adding a framework target

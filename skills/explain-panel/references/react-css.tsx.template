@@ -9,9 +9,12 @@ Placeholders: same set as react-tailwind.tsx.template, plus:
 "use client";
 
 import { useState, useEffect, useRef, type ReactNode } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./ExplainPanel.css";
+{{ PRISM_LANGUAGE_IMPORTS }}
+
+{{ PRISM_LANGUAGE_REGISTRATIONS }}
 
 export type SectionId = {{ SECTION_ID_UNION }};
 type Group = {{ GROUP_ID_UNION }};

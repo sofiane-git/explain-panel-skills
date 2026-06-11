@@ -1,5 +1,9 @@
 name: Validate
 
+# Workflow only reads the repo — never grant the default write token.
+permissions:
+  contents: read
+
 on:
   pull_request:
     paths:
@@ -9,6 +13,7 @@ on:
       - "skills/**"
       - ".claude-plugin/**"
       - "package.json"
+      - "docs/install.md"
       - "docs/media/demo.html"
       - ".github/workflows/validate-schemas.yml"
   push:
@@ -19,21 +24,21 @@ jobs:
     name: Pipeline-map schema
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "20"
 
       - name: Validate schema syntax
-        run: npx -y ajv-cli@5 compile --spec=draft2020 -s schemas/pipeline-map.schema.json
+        run: npx -y ajv-cli@5.0.0 compile --spec=draft2020 -s schemas/pipeline-map.schema.json
 
       - name: Validate all example maps
         run: |
           set -e
           for map in examples/*/docs/pipeline-map.json ; do
             echo "→ $map"
-            npx -y ajv-cli@5 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d "$map"
+            npx -y ajv-cli@5.0.0 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d "$map"
           done
 
       - name: Examples declare current schema version
@@ -53,7 +58,7 @@ jobs:
     name: Plugin + marketplace manifests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Plugin and marketplace JSON parse
         run: |
@@ -84,13 +89,22 @@ jobs:
             exit 1
           fi
 
+      - name: docs/install.md cites the current plugin version
+        # install.md mentions the version literal in prose; CI keeps it from going stale.
+        run: |
+          PV=$(jq -r '.version' .claude-plugin/plugin.json)
+          if ! grep -q "currently \`$PV\`" docs/install.md ; then
+            echo "::error file=docs/install.md::install.md cites a stale plugin version (expected \`$PV\`)"
+            exit 1
+          fi
+
   templates:
     name: HTML template + demo syntax
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
 
@@ -173,3 +187,38 @@ jobs:
             exit 1
           fi
           echo "python-cli HTML ≡ demo.html OK"
+
+  components:
+    name: Example components compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+
+      - name: Type-check React example components
+        # CONTRIBUTING.md rule 3 says "templates compile" — this enforces it on the
+        # checked-in example components. Components are copied next to node_modules
+        # because tsc resolves imports from the file's own directory upward.
+        run: |
+          set -e
+          mkdir -p /tmp/tsxcheck && cd /tmp/tsxcheck
+          npm init -y > /dev/null
+          npm install --no-save --silent react@18 react-dom@18 @types/react@18 @types/react-dom@18 react-syntax-highlighter@15 @types/react-syntax-highlighter@15 typescript@5
+          cp "$GITHUB_WORKSPACE/examples/fastapi-rag/components/ExplainPanel.tsx" FastapiPanel.tsx
+          cp "$GITHUB_WORKSPACE/examples/nextjs-app/components/ExplainPanel.tsx" NextjsPanel.tsx
+          npx tsc --noEmit --jsx react-jsx --module esnext --moduleResolution bundler --target es2020 --skipLibCheck FastapiPanel.tsx NextjsPanel.tsx
+          echo "React example components type-check OK"
+
+      - name: Type-check Vue example component
+        run: |
+          set -e
+          mkdir -p /tmp/vuecheck && cd /tmp/vuecheck
+          npm init -y > /dev/null
+          npm install --no-save --silent vue@3 shiki@1 vue-tsc@2 typescript@5
+          cp "$GITHUB_WORKSPACE/examples/nuxt-app/components/ExplainPanel.vue" "$GITHUB_WORKSPACE/examples/nuxt-app/components/ExplainPanel.css" .
+          printf '%s\n' '{ "compilerOptions": { "module": "esnext", "moduleResolution": "bundler", "target": "es2020", "skipLibCheck": true, "noEmit": true, "jsx": "preserve", "strict": false }, "include": ["ExplainPanel.vue"] }' > tsconfig.json
+          npx vue-tsc --noEmit -p tsconfig.json
+          echo "Vue example component type-checks OK"

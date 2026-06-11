@@ -38,11 +38,11 @@ Primary framework of the project. Drives two decisions in `/explain-panel`:
 
 Allowed values: `nextjs | nuxt | react | vue | fastapi | django | express | rails | other`.
 
-### `roots[]` (array of strings, required)
+### `roots[]` (array of strings, optional but strongly recommended)
 
-Workspace roots that were analysed. Single entry for non-monorepo projects, multiple for monorepos. Paths are relative to the repository root (the directory containing this JSON file's parent — i.e. relative to `docs/pipeline-map.json`'s `../`).
+Workspace roots that were analysed. Single entry for non-monorepo projects, multiple for monorepos. Paths are relative to the repository root (the directory containing this JSON file's parent — i.e. relative to `docs/pipeline-map.json`'s `../`). Like `file`, entries must stay inside the repo: absolute paths (leading `/`), `..` sequences, and characters outside `[A-Za-z0-9_./-]` are rejected by the schema.
 
-`/explain-panel`'s Pass-B audit re-scans these roots looking for code missing from the map. Don't leave it empty — `/explain-panel` will treat that as a misconfiguration.
+`/explain-panel`'s Pass-B audit re-scans these roots looking for code missing from the map. When the field is absent, the audit falls back to scanning `"."` (the whole repo) — set it explicitly so the scan stays scoped.
 
 ```json
 "roots": ["."]                                    // single-package repo
@@ -145,7 +145,7 @@ One-sentence prose rendered above the code block. Use it when the snippet alone 
 
 ### `file` (string, required)
 
-Path to the source file. Repo-root-relative.
+Path to the source file. Repo-root-relative. The schema rejects absolute paths (leading `/`), `..` traversal sequences, and characters outside `[A-Za-z0-9_./-]` — a map can never point `/explain-panel` at files outside the repo.
 
 ### `function` (string, required)
 
@@ -169,7 +169,7 @@ For readability, keep `(snippet_end - snippet_start)` between 14 and 34. Longer 
 
 ### `annotations` (object, optional)
 
-Map from **snippet-relative** line numbers to explanatory notes. Line `1` is the first line of the snippet — NOT `snippet_start`. The renderer:
+Map from **snippet-relative** line numbers to explanatory notes. Line `1` is the first line of the snippet — NOT `snippet_start`. Keys must match `^[1-9][0-9]*$` (no `"0"`, no leading zeros). The renderer:
 1. Highlights the annotated line's background.
 2. Lists `Lk → note` entries below the code block.
 

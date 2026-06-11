@@ -1,7 +1,14 @@
 {{!
-Placeholders (same as react-tailwind variant, see that template's header for full list).
+Placeholders (same as react-tailwind variant, see that template's header for full list —
+except {{ PRISM_LANGUAGE_IMPORTS }} / {{ PRISM_LANGUAGE_REGISTRATIONS }}, which are React-only;
+shiki needs no registration step here).
 Additional notes for Vue:
 - shiki produces pre-rendered HTML strings; we render them with v-html (sanitized at source — shiki output is safe).
+- bundle: the `codeToHtml` shorthand lazy-loads each grammar/theme via dynamic `import()` on first
+  highlight, so only the languages actually used ship to the client. For the smallest possible
+  bundle, switch to `createHighlighterCore` + `@shikijs/engine-javascript` — see
+  docs/customization.md#bundle-size. Highlighting runs client-side in onMounted; if runtime cost
+  matters more than component ergonomics, prefer the HTML standalone variant (pre-rendered).
 - Annotation highlight is applied via shiki's transformerNotationHighlight pattern: we wrap annotated lines in <span class="line annotated"> on the client.
 }}
 <script setup lang="ts">

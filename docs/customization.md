@@ -100,8 +100,8 @@ The three output variants have very different runtime costs. Pick with eyes open
 | Variant | Runtime deps | Approx min+gz | Notes |
 |---|---|---|---|
 | HTML standalone | none | ~5 KB CSS + ~17 KB total file | Zero JS dependencies. Pre-tokenized at generation time. Best for backend-only projects and static-doc embeds. |
-| React + Tailwind | `react-syntax-highlighter` (Prism) | ~80–110 KB after tree-shake; full bundle ~500 KB unshaken | Tree-shakes well in Next.js / Vite when importing only `Prism` and the specific style. Avoid importing `react-syntax-highlighter/dist/esm/styles/prism` of unused themes. |
-| Vue + Tailwind / CSS | `shiki` | ~70–150 KB after lazy-loading languages; full bundle ~1 MB if you ship every language | Lazy-load language grammars (`shiki.loadLanguage('python')` on demand) — do **not** ship the full Shiki language bundle. |
+| React + Tailwind | `react-syntax-highlighter` (Prism) | ~40–80 KB with `PrismLight` + per-language registration; ~500 KB if you import the root `Prism` build | The generated component imports `PrismLight` and registers **only** the languages present in the map (`SyntaxHighlighter.registerLanguage("python", python)`). Do not switch back to the root `Prism` export — it bundles every Prism grammar. Import a single style theme. |
+| Vue + Tailwind / CSS | `shiki` | ~70–150 KB per used language+theme, loaded on demand; ~1 MB+ if you eagerly bundle every grammar | The generated component uses the `codeToHtml` shorthand, which lazy-loads each grammar/theme via dynamic `import()` on first highlight — only the languages actually used ship. For the smallest bundle, switch to `createHighlighterCore` + `@shikijs/engine-javascript` (drops the Oniguruma WASM engine). |
 
 If runtime cost is a concern on a project where a frontend *is* detected, you can still get the HTML standalone variant: temporarily remove or rename `package.json` (or run `/explain-panel` from a sibling backend-only directory) so the detection in Phase 3 falls through to the HTML auto-fallback. The resulting `docs/ExplainPanel.html` has zero JS deps and can be embedded as a static asset in any meta-framework.
 

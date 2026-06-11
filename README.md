@@ -62,7 +62,8 @@ Full instructions, troubleshooting, and contributor workflow: [docs/install.md](
 # 1. From your project root — analyse the codebase
 /explore-pipeline
 # Answers a few questions about monorepo layout, primary framework,
-# and header language (optional — defaults to English if you skip).
+# and header language (optional — if you skip, the header falls back to the
+# schema default, currently French: "Comment ça marche — flux de données complet").
 # Writes docs/pipeline-map.json.
 
 # 2. Optionally hand-edit docs/pipeline-map.json to tighten titles, annotations, ordering.
@@ -186,7 +187,7 @@ Four reference projects with full `pipeline-map.json` + generated component. The
 - [`examples/nuxt-app/`](examples/nuxt-app/) — Nuxt 3 site. Backend = Nitro `server/api/*` handlers (no separate service). Vue SFC output + plain-CSS variant.
 - [`examples/python-cli/`](examples/python-cli/) — backend-only Python CLI with **no frontend at all** (`framework: "other"`). Demonstrates the HTML standalone auto-fallback: the same `docs/ExplainPanel.html` you see embedded in the [Demo](#demo) above is the output here.
 
-> **The examples are snapshots, not runnable repos.** Each `examples/*/` directory ships a complete `docs/pipeline-map.json` and the corresponding generated component (`components/ExplainPanel.tsx` / `.vue`) so reviewers can see input → output without running the skills themselves. The Python / TS / Vue source files referenced from the maps (`app/ingest/news_api.py`, `app/page.tsx`, `pages/index.vue`, etc.) **do not exist** in the example directories — those paths describe the original projects the examples were authored from. As a consequence, running `/explain-panel` from inside an example directory will fail the audit phase ("file not found"), and that is expected. The examples exist to document the format and the generated output, not to be re-run.
+> **The examples are snapshots, not runnable repos.** Each `examples/*/` directory ships a complete `docs/pipeline-map.json` and the corresponding generated component (`components/ExplainPanel.tsx` / `.vue`) so reviewers can see input → output without running the skills themselves. The Python / TS / Vue source files referenced from the maps (`app/ingest/news_api.py`, `app/page.tsx`, `pages/index.vue`, etc.) **do not exist** in the example directories — those paths describe the original projects the examples were authored from. As a consequence, running `/explain-panel` from inside an example directory will fail the audit phase ("file not found"), and that is expected. The examples exist to document the format and the generated output, not to be re-run. For the same reason they are deliberately trimmed to 3–9 sections each — below the 8–13-module guidance `/explore-pipeline` applies to real projects — so reviewers can read input and output in one sitting.
 
 ## Documentation
 

@@ -1,6 +1,6 @@
 # Keyboard handler reference
 
-The generated component must support these interactions out of the box. Both templates implement them already — this file documents the contract so future template variants stay consistent.
+The generated component must support these interactions out of the box. All template variants (React Tailwind/CSS, Vue Tailwind/CSS, HTML standalone) implement them already — this file documents the contract so future template variants stay consistent.
 
 ## Required behaviours
 
@@ -20,6 +20,8 @@ When the user opens a panel with the keyboard, then presses Escape, leaving focu
 Both React (`useEffect` + `document.addEventListener`) and Vue (`onMounted` + `document.addEventListener`) use the same document-level listener. The handler reads the currently-open section id from state and uses `document.getElementById(\`explain-btn-${id}\`)?.focus()` to return focus.
 
 The listener is cleaned up on unmount in both frameworks.
+
+The HTML standalone variant gets Tab/Enter/Space for free from native `<details>`/`<summary>` and implements the same Escape-with-focus-return behaviour via the inline `<script>` at the bottom of `html-standalone.html.template` (closes the open `<details>`, focuses its `<summary>`).
 
 ## What we deliberately do NOT do
 

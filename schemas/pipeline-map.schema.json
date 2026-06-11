@@ -29,9 +29,15 @@
     },
     "roots": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500,
+        "pattern": "^[A-Za-z0-9_./\\-]+$",
+        "not": { "pattern": "\\.\\.|^/" }
+      },
       "minItems": 1,
-      "description": "Workspace roots scanned during exploration. Single entry for non-monorepo projects, multiple for monorepos. Paths are relative to the repository root.",
+      "description": "Workspace roots scanned during exploration. Single entry for non-monorepo projects, multiple for monorepos. Paths are relative to the repository root. Absolute paths (leading `/`) and traversal sequences (`..`) are rejected at validation time — same containment contract as `file`.",
       "examples": [["."], ["app/", "web/"], ["packages/api/", "packages/web/", "packages/shared/"]]
     },
     "header": {
@@ -60,7 +66,7 @@
       "minItems": 1,
       "maxItems": 8,
       "items": { "$ref": "#/$defs/Group" },
-      "description": "Pipeline stages ordered chronologically. Each group contains 1–5 sections."
+      "description": "Pipeline stages ordered chronologically. Each group contains 1–8 sections."
     }
   },
   "$defs": {
@@ -141,8 +147,8 @@
           "minLength": 1,
           "maxLength": 500,
           "pattern": "^[A-Za-z0-9_./\\-]+$",
-          "not": { "pattern": "\\.\\." },
-          "description": "Path to the source file containing the snippet. Relative to repository root, regardless of which `roots` entry it lives under. Path-traversal sequences (`..`) and characters outside `[A-Za-z0-9_./-]` are rejected at validation time — this prevents a hand-edited or auto-generated map from making /explain-panel read files outside the repo when applying its audit phase."
+          "not": { "pattern": "\\.\\.|^/" },
+          "description": "Path to the source file containing the snippet. Relative to repository root, regardless of which `roots` entry it lives under. Path-traversal sequences (`..`), absolute paths (leading `/`), and characters outside `[A-Za-z0-9_./-]` are rejected at validation time — this prevents a hand-edited or auto-generated map from making /explain-panel read files outside the repo when applying its audit phase."
         },
         "function": {
           "type": "string",
@@ -175,7 +181,7 @@
           "type": "object",
           "description": "Map of snippet-relative line numbers to explanatory notes. Line `1` is the first line of the snippet (NOT line `snippet_start` in the file). Each note should explain WHY the line exists, not WHAT it does. Keep notes under 200 characters for layout.",
           "patternProperties": {
-            "^[0-9]+$": {
+            "^[1-9][0-9]*$": {
               "type": "string",
               "minLength": 1,
               "maxLength": 240
