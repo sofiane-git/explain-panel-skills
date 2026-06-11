@@ -19,6 +19,7 @@
     "project": {
       "type": "string",
       "minLength": 1,
+      "maxLength": 200,
       "description": "Human-readable project name. Used in the generated component header."
     },
     "framework": {
@@ -40,10 +41,14 @@
       "properties": {
         "title": {
           "type": "string",
+          "minLength": 1,
+          "maxLength": 300,
           "description": "Title shown above the group chips. Default: 'How it works — full data flow'."
         },
         "icon": {
           "type": "string",
+          "minLength": 1,
+          "maxLength": 4,
           "description": "Single emoji prefixed to the title. Default: '📚'."
         }
       }
@@ -70,6 +75,7 @@
         "label": {
           "type": "string",
           "minLength": 1,
+          "maxLength": 100,
           "description": "Display name shown on the group chip and section divider."
         },
         "color": {
@@ -119,22 +125,33 @@
         "title": {
           "type": "string",
           "minLength": 1,
+          "maxLength": 200,
           "description": "Action-phrase title describing what the section's code does."
         },
         "summary": {
           "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
           "description": "Optional one-sentence prose summary rendered above the code snippet."
         },
         "file": {
           "type": "string",
-          "description": "Path to the source file containing the snippet. Relative to repository root, regardless of which `roots` entry it lives under."
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "^[A-Za-z0-9_./\\-]+$",
+          "not": { "pattern": "\\.\\." },
+          "description": "Path to the source file containing the snippet. Relative to repository root, regardless of which `roots` entry it lives under. Path-traversal sequences (`..`) and characters outside `[A-Za-z0-9_./-]` are rejected at validation time — this prevents a hand-edited or auto-generated map from making /explain-panel read files outside the repo when applying its audit phase."
         },
         "function": {
           "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
           "description": "Name of the primary function/class/symbol the snippet illustrates. Used in audit checks and the `module` display string."
         },
         "module": {
           "type": "string",
+          "minLength": 1,
+          "maxLength": 300,
           "description": "Display string shown in the section header. Conventionally `<file> · <function>()`."
         },
         "language": {

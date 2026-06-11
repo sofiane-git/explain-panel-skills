@@ -1,4 +1,4 @@
-name: Validate schemas
+name: Validate
 
 on:
   pull_request:
@@ -6,12 +6,16 @@ on:
       - "schemas/**"
       - "examples/**/docs/pipeline-map.json"
       - "skills/**"
+      - ".claude-plugin/**"
+      - "package.json"
+      - "docs/media/demo.html"
       - ".github/workflows/validate-schemas.yml"
   push:
     branches: [main]
 
 jobs:
-  validate:
+  schema:
+    name: Pipeline-map schema
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,11 +38,112 @@ jobs:
             ajv validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d "$map"
           done
 
-      - name: Verify schema version matches plugin.json
+      - name: Examples declare current schema version
         run: |
+          set -e
           SCHEMA_CONST=$(jq -r '.properties.schemaVersion.const' schemas/pipeline-map.schema.json)
-          PLUGIN_V=$(jq -r '.schemaVersion' plugin.json)
-          if [ "$SCHEMA_CONST" != "$PLUGIN_V" ] ; then
-            echo "schemaVersion mismatch — schema says $SCHEMA_CONST, plugin.json says $PLUGIN_V"
+          echo "Schema declares version: $SCHEMA_CONST"
+          for map in examples/*/docs/pipeline-map.json ; do
+            DECLARED=$(jq -r '.schemaVersion' "$map")
+            if [ "$SCHEMA_CONST" != "$DECLARED" ] ; then
+              echo "::error file=$map::schemaVersion mismatch — schema says $SCHEMA_CONST, map says $DECLARED"
+              exit 1
+            fi
+          done
+
+  plugin:
+    name: Plugin + marketplace manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Plugin and marketplace JSON parse
+        run: |
+          jq -e 'has("name") and has("version") and has("description")' .claude-plugin/plugin.json
+          jq -e 'has("name") and has("owner") and (.plugins | length > 0)' .claude-plugin/marketplace.json
+
+      - name: Plugin version is SemVer
+        run: |
+          V=$(jq -r '.version' .claude-plugin/plugin.json)
+          echo "$V" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([-+.][0-9A-Za-z.-]+)?$' \
+            || (echo "Not SemVer: $V" && exit 1)
+
+      - name: Plugin and marketplace agree on plugin version
+        run: |
+          PV=$(jq -r '.version' .claude-plugin/plugin.json)
+          MV=$(jq -r '.plugins[] | select(.name=="docpanel") | .version' .claude-plugin/marketplace.json)
+          if [ "$PV" != "$MV" ] ; then
+            echo "::error::plugin.json version ($PV) ≠ marketplace.json plugin entry version ($MV)"
             exit 1
           fi
+
+      - name: package.json version tracks plugin.json version
+        run: |
+          PV=$(jq -r '.version' .claude-plugin/plugin.json)
+          NV=$(jq -r '.version' package.json)
+          if [ "$PV" != "$NV" ] ; then
+            echo "::error::plugin.json version ($PV) ≠ package.json version ($NV)"
+            exit 1
+          fi
+
+  templates:
+    name: HTML template + demo syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Strip skill-template comments, then parse the HTML standalone template
+        # The {{! ... }} block is the kit's own placeholder-doc syntax; strip it
+        # before parsing. Then run html.parser to surface unclosed tags / bad escapes.
+        # Also asserts the four required placeholders are present.
+        run: |
+          python3 - <<'PY'
+          import re, pathlib, sys
+          from html.parser import HTMLParser
+
+          class Strict(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.errs = []
+              def error(self, msg):
+                  self.errs.append(msg)
+
+          tpl_path = pathlib.Path("skills/explain-panel/references/html-standalone.html.template")
+          tpl = tpl_path.read_text()
+          stripped = re.sub(r"\{\{!.*?\}\}", "", tpl, flags=re.S)
+          # Also strip the bare {{ NAME }} placeholders so parser doesn't trip on them in attrs
+          stripped = re.sub(r"\{\{\s*[A-Z_]+\s*\}\}", "PLACEHOLDER", stripped)
+          p = Strict()
+          p.feed(stripped)
+          p.close()
+          if p.errs:
+              print("HTML parser errors:", p.errs); sys.exit(1)
+
+          required = ["{{ ICON }}", "{{ HEADER_TITLE }}", "{{ GROUP_SECTIONS_BLOCKS }}", "{{ LANG }}"]
+          missing = [r for r in required if r not in tpl]
+          if missing:
+              print("Template missing placeholders:", missing); sys.exit(1)
+
+          print("HTML standalone template OK")
+          PY
+
+      - name: docs/media/demo.html parses
+        run: |
+          python3 - <<'PY'
+          import pathlib, sys
+          from html.parser import HTMLParser
+          class Strict(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.errs = []
+              def error(self, msg): self.errs.append(msg)
+          p = Strict()
+          p.feed(pathlib.Path("docs/media/demo.html").read_text())
+          p.close()
+          if p.errs:
+              print(p.errs); sys.exit(1)
+          print("demo.html parses OK")
+          PY
