@@ -1,6 +1,6 @@
 ---
 name: explain-panel
-description: Generate a fully populated ExplainPanel accordion documentation component from docs/pipeline-map.json. Produces TSX (React/Next.js), Vue SFC (Vue/Nuxt), or a self-contained HTML file (backend-only projects: FastAPI, Django, Rails, Go, Rust, CLIs — auto-fallback when no frontend is detected, zero runtime deps). Includes syntax-highlighted code snippets, per-line annotations, color-coded pipeline stages, and full ARIA/keyboard support. Use when the user wants to generate, refresh, or rebuild the explain panel after running /explore-pipeline, or asks "build the documentation panel" / "generate the explain UI" / "create the ExplainPanel component" / "build standalone HTML docs for my backend". Runs a mandatory two-pass audit (JSON↔code cross-check + full codebase scan for missing modules) and waits for confirmation before generating.
+description: 'Generate an accordion documentation component from docs/pipeline-map.json — TSX (React/Next.js), Vue SFC (Vue/Nuxt), or self-contained HTML (backend-only auto-fallback, zero runtime deps). Includes syntax-highlighted snippets, per-line annotations, color-coded groups, ARIA/keyboard support. Use when the user wants to build, refresh, or rebuild the explain panel after running /explore-pipeline, or asks to generate the documentation panel, the explain UI, the ExplainPanel component, or standalone HTML docs for a backend project. Audits the map against live code before generating.'
 ---
 
 # Explain Panel
@@ -228,6 +228,7 @@ If type-check fails, attempt to fix obvious issues (missing comma, stray `;`, wr
 - [ ] All `<`, `>`, `&` in code content are HTML-escaped (`&lt;`, `&gt;`, `&amp;`) — except inside `<span class="…">` tags themselves.
 - [ ] Every annotation line number has a matching `is-annotated` line in the corresponding section's snippet.
 - [ ] Native `<details>`/`<summary>` keyboard (Tab + Enter) works, and the inline `<script>` adds Escape-to-close. No CDN, no other `<script>` tags.
+- [ ] **Output XSS scan**: `grep -cE '<script|javascript:|[[:space:]\"'\'']on[a-z]+[[:space:]]*=' docs/ExplainPanel.html` returns at most `1` (the single inline Escape-key handler `<script>` at the bottom of the template). Any other match means an unescaped payload from `title`/`summary`/`annotations`/`module` slipped through — re-escape the offending field and regenerate. The schema rejects path-traversal and bounds string lengths, but it cannot enforce HTML-escape of the contents themselves, so this scan is the last line of defense. The `[[:space:]"']on[a-z]+[[:space:]]*=` clause requires an event-handler attribute to actually begin at an attribute boundary (after whitespace or a quote), which avoids false positives on words containing `on` like `content=` or `connection=`.
 
 ### Phase 8 — Report
 
