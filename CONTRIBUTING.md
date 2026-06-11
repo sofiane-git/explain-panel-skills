@@ -23,6 +23,15 @@ cd explain-panel-skills
 npx -y ajv-cli@5.0.0 validate --spec=draft2020 -s schemas/pipeline-map.schema.json -d 'examples/*/docs/pipeline-map.json'
 ```
 
+## Branch & PR workflow
+
+`main` is protected — no direct pushes, not even for maintainers. Every change lands through a pull request:
+
+1. Branch from `main`. Naming: `fix/<topic>`, `feat/<topic>`, `docs/<topic>`, `ci/<topic>`, or `release/vX.Y.Z`.
+2. Commit with a [Conventional Commits](https://www.conventionalcommits.org/) message, including a `CHANGELOG.md` entry under `## [Unreleased]` for any user-visible change.
+3. Open the PR. All four CI checks (`Pipeline-map schema`, `Plugin + marketplace manifests`, `HTML template + demo syntax`, `Example components compile`) are **required** — they run on every PR regardless of which files changed, and the branch must be up to date with `main` before merging.
+4. Merge via **squash** once green (and approved, when reviews apply). Force-pushes and deletions of `main` are blocked.
+
 ## Adding a framework target
 
 1. Drop a new template into `skills/explain-panel/references/`.

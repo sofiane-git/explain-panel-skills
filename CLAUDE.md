@@ -10,6 +10,10 @@ npm run validate:schema        # schema + all example maps (ajv-cli 5.0.0, draft
 
 CI is `.github/workflows/validate-schemas.yml` — four jobs: schema, plugin manifests, HTML template checks, example-component type-check. Mirror the relevant job locally before committing (commands inside the workflow are copy-pasteable).
 
+## Workflow
+
+`main` is protected: never commit or push to it directly. Branch (`fix/…`, `feat/…`, `docs/…`, `ci/…`, `release/vX.Y.Z`), open a PR, wait for the four required CI checks, squash-merge. Tags are pushed after the release PR merges (see `docs/releasing.md`).
+
 ## Invariants — check before editing
 
 - **The schema is the single source of truth.** Header default text lives in the `default` keyword of `schemas/pipeline-map.schema.json` — never hardcode it in docs, templates, or SKILL.md. Field constraints in prose docs must match the schema; when they disagree, the schema wins.

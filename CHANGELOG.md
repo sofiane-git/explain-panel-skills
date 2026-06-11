@@ -4,7 +4,9 @@ All notable changes to this project will be documented here. Format follows [Kee
 
 ## [Unreleased]
 
-(No unreleased changes.)
+### Changed
+- **`main` is now protected — all changes land through pull requests** with the four CI checks required and the branch up to date with `main`. Force-pushes and deletions blocked. Workflow documented in `CONTRIBUTING.md` (Branch & PR workflow), `CLAUDE.md`, and `docs/releasing.md` (release commits go through a `release/vX.Y.Z` PR; only tags are pushed directly).
+- CI runs on **every** PR: `pull_request` path filters removed — a path-filtered job that doesn't run never reports its required status check, deadlocking the PR on "Expected — waiting for status". Added workflow-level `concurrency` (cancels superseded runs) and `timeout-minutes: 10` per job.
 
 ## [1.1.1] — 2026-06-11
 

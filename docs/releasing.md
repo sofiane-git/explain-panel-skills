@@ -27,7 +27,7 @@ Edge case from real history: rejecting absolute paths in `file`/`roots[]` *tight
 
 ## Release checklist
 
-Run from a clean working tree on `main`.
+Start from a clean working tree, up to date with `origin/main`. `main` is protected — the release commit lands through a PR like any other change; only the tag is pushed directly (tags are not branch-protected).
 
 1. **Audit `[Unreleased]`** in `CHANGELOG.md` — complete, accurate, sections in this order: `Security`, `Fixed`, `Changed`, `Added`, `Deprecated`, `Removed` (Keep a Changelog 1.1.0; omit empty sections).
 2. **Pick the bump** using the SemVer policy above. When hesitating between two, pick the larger only if a user could be broken; otherwise the smaller.
@@ -50,9 +50,9 @@ Run from a clean working tree on `main`.
      [ "$PV" = "$(jq -r '.plugins[0].version' .claude-plugin/marketplace.json)" ] && \
      grep -q "currently \`$PV\`" docs/install.md && echo "versions OK ($PV)"
    ```
-7. **Commit**: `chore(release): vX.Y.Z — <one-line theme>`.
-8. **Tag** (annotated): `git tag -a vX.Y.Z -m "vX.Y.Z — <one-line theme>"`.
-9. **Push**: `git push origin main --follow-tags`.
+7. **Release PR**: branch `release/vX.Y.Z`, commit `chore(release): vX.Y.Z — <one-line theme>`, push, open the PR. Wait for the four required checks, squash-merge.
+8. **Tag the merge commit** (annotated): `git checkout main && git pull`, then `git tag -a vX.Y.Z -m "vX.Y.Z — <one-line theme>"`. Tagging anything other than the post-merge tip of `main` ships a release that differs from `main`.
+9. **Push the tag**: `git push origin vX.Y.Z`.
 10. **GitHub release**: `gh release create vX.Y.Z --title "vX.Y.Z — <theme>" --notes "<the CHANGELOG section for X.Y.Z, verbatim>"`.
 11. **Smoke-test the update path** in a Claude Code session: `/plugin marketplace update explain-panel-skills` → `/plugin install docpanel@explain-panel-skills` → `/reload-plugins` → confirm the new version is reported.
 
