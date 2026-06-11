@@ -199,6 +199,7 @@ Four reference projects with full `pipeline-map.json` + generated component. The
 | [`docs/monorepo.md`](docs/monorepo.md) | How `roots[]` works, how detection runs, when to override |
 | [`docs/migration.md`](docs/migration.md) | Upgrading between schema versions |
 | [`docs/install.md`](docs/install.md) | Install paths (marketplace, manual copy, symlink), troubleshooting, and marketplace publishing notes |
+| [`docs/releasing.md`](docs/releasing.md) | Versioning policy (kit version vs `schemaVersion`), release checklist, release-notes conventions |
 
 ## Schema
 

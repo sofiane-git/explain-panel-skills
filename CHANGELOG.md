@@ -4,6 +4,10 @@ All notable changes to this project will be documented here. Format follows [Kee
 
 ## [Unreleased]
 
+(No unreleased changes.)
+
+## [1.1.1] — 2026-06-11
+
 ### Security
 - **Schema: absolute paths now rejected in `file` and `roots[]`.** The v1.0/v1.1 schema only rejected `..` traversal sequences; a map declaring `"file": "/etc/passwd"` validated successfully, contradicting the documented containment contract ("prevents maps from making /explain-panel read files outside the repo"). `file` and every `roots[]` entry now also reject a leading `/`, and `roots[]` entries gained the same character whitelist as `file`. This tightens validation to match the contract that was always documented — maps that relied on absolute paths were exploiting a validation gap, not a feature, so `schemaVersion` stays `1.0`.
 - CI workflow hardened: explicit `permissions: contents: read`, all GitHub Actions pinned to commit SHAs, `ajv-cli` pinned to exact `5.0.0` everywhere it is invoked (CI, `package.json`, docs, skill instructions).
@@ -26,6 +30,8 @@ All notable changes to this project will be documented here. Format follows [Kee
 ### Added
 - CI: example components are now type-checked (`tsc` for the React TSX examples, `vue-tsc` for the Vue example) — enforces CONTRIBUTING's "templates compile" rule.
 - CI: `docs/install.md` version-prose sync check.
+- `docs/releasing.md` — versioning policy (kit version vs `schemaVersion` as two distinct contracts), step-by-step release checklist, release-notes conventions, and the list of CI guards. Linked from README and CONTRIBUTING.
+- `CLAUDE.md` — repo-level guide for Claude Code sessions: validation commands, cross-file invariants, pointer to the release runbook.
 
 ## [1.1.0] — 2026-06-11
 
@@ -68,6 +74,7 @@ All notable changes to this project will be documented here. Format follows [Kee
 - Issue templates: bug report, feature request, schema-violation report.
 - Migration scaffold for future schema versions.
 
-[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/sofiane-git/explain-panel-skills/releases/tag/v1.0.0

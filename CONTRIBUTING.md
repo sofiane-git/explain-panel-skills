@@ -76,6 +76,10 @@ Three trust boundaries in the generated output, do not erode them:
 2. **Vue variants** (`vue-tailwind.vue.template`, `vue-css.vue.template`). The templates use `v-html` to render shiki's pre-rendered highlighted HTML. Trust boundary = shiki's own escaping of source code. If you bump shiki, pin a known-good version in the install instructions and check shiki's changelog for sanitizer regressions. Do not expand `v-html` usage to render any string that did not come straight out of shiki.
 3. **React variants**. JSX auto-escapes text content. Never reach for `dangerouslySetInnerHTML` — if you think you need it, pre-escape and use plain text, or push the formatting into the schema as structured data.
 
+## Releases
+
+Maintainer-only. The full runbook — SemVer policy, the four version locations, changelog restructuring, tagging, GitHub release — lives in [`docs/releasing.md`](docs/releasing.md). Contributors only need to know one thing: put your changelog entry under `## [Unreleased]` and never edit a released section.
+
 ## Reporting bugs
 
 Open an issue using the bug-report template. Attach:
