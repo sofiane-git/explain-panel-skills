@@ -26,3 +26,6 @@ venv/
 *.local
 workspace/
 evals-output/
+
+# Claude Code — personal overrides (project settings.json IS committed)
+.claude/settings.local.json

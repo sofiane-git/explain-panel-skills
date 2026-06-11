@@ -14,6 +14,8 @@ CI is `.github/workflows/validate-schemas.yml` — four jobs: schema, plugin man
 
 `main` is protected: never commit or push to it directly. Branch (`fix/…`, `feat/…`, `docs/…`, `ci/…`, `release/vX.Y.Z`), open a PR, wait for the four required CI checks, squash-merge. Tags are pushed after the release PR merges (see `docs/releasing.md`).
 
+This rule is **enforced**, not advisory: a PreToolUse hook (`.claude/hooks/protect-main.sh`, wired in `.claude/settings.json`) denies `git commit` and `git push` issued from local `main` (tag-only pushes excepted — release runbook) and any push with a `main` refspec. GitHub branch protection rejects direct pushes server-side as the final gate.
+
 ## Invariants — check before editing
 
 - **The schema is the single source of truth.** Header default text lives in the `default` keyword of `schemas/pipeline-map.schema.json` — never hardcode it in docs, templates, or SKILL.md. Field constraints in prose docs must match the schema; when they disagree, the schema wins.
