@@ -9,7 +9,7 @@
       "name": "docpanel",
       "source": "./",
       "description": "Two Claude Code skills (/explore-pipeline + /explain-panel) that generate a beautiful accordion documentation component from any codebase — TSX (React/Next.js), Vue SFC (Vue/Nuxt), or a self-contained HTML file (auto-fallback for backend-only projects, zero runtime deps).",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "author": {
         "name": "Sofiane Conan"
       },

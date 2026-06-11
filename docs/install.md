@@ -35,7 +35,7 @@ Claude Code prefixes plugin-distributed skills with the plugin name (`<plugin>:<
 /plugin install docpanel@explain-panel-skills
 ```
 
-The plugin pins to the version declared in `.claude-plugin/plugin.json` (currently `1.1.1` — CI checks that this line stays in sync with the manifest). Bumping that field signals a new release to all installed users; until then, `update` is a no-op even if the repo has new commits. See [`CHANGELOG.md`](../CHANGELOG.md) for what each version ships.
+The plugin pins to the version declared in `.claude-plugin/plugin.json` (currently `1.1.2` — CI checks that this line stays in sync with the manifest). Bumping that field signals a new release to all installed users; until then, `update` is a no-op even if the repo has new commits. See [`CHANGELOG.md`](../CHANGELOG.md) for what each version ships.
 
 ### Uninstall
 

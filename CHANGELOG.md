@@ -4,6 +4,10 @@ All notable changes to this project will be documented here. Format follows [Kee
 
 ## [Unreleased]
 
+(No unreleased changes.)
+
+## [1.1.2] — 2026-06-12
+
 ### Changed
 - **`main` is now protected — all changes land through pull requests** with the four CI checks required and the branch up to date with `main`. Force-pushes and deletions blocked. Workflow documented in `CONTRIBUTING.md` (Branch & PR workflow), `CLAUDE.md`, and `docs/releasing.md` (release commits go through a `release/vX.Y.Z` PR; only tags are pushed directly).
 - CI runs on **every** PR: `pull_request` path filters removed — a path-filtered job that doesn't run never reports its required status check, deadlocking the PR on "Expected — waiting for status". Added workflow-level `concurrency` (cancels superseded runs) and `timeout-minutes: 10` per job.
@@ -79,7 +83,8 @@ All notable changes to this project will be documented here. Format follows [Kee
 - Issue templates: bug report, feature request, schema-violation report.
 - Migration scaffold for future schema versions.
 
-[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/sofiane-git/explain-panel-skills/releases/tag/v1.0.0
