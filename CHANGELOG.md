@@ -4,6 +4,10 @@ All notable changes to this project will be documented here. Format follows [Kee
 
 ## [Unreleased]
 
+(No unreleased changes.)
+
+## [1.0.0] — 2026-06-11
+
 ### Added
 - Initial release of `explain-panel-skills`.
 - `/explore-pipeline` skill: walks any codebase and produces `docs/pipeline-map.json`.
@@ -27,4 +31,5 @@ All notable changes to this project will be documented here. Format follows [Kee
 - Issue templates: bug report, feature request, schema-violation report.
 - Migration scaffold for future schema versions.
 
-[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/main...HEAD
+[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/sofiane-git/explain-panel-skills/releases/tag/v1.0.0

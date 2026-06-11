@@ -59,6 +59,7 @@ Title shown at the top of the rendered component. Defaults to `"How it works —
 
 Single emoji prefixed to the title. Defaults to `📚`.
 
+<a id="groups"></a>
 ### `groups[]` (array, required, 1–8 items)
 
 Pipeline stages, ordered chronologically. Each group:

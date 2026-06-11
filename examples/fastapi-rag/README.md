@@ -31,7 +31,11 @@ It demonstrates:
 
 Reading the pipeline map is the fastest way to understand what `/explore-pipeline` produces in practice.
 
+## Preview
+
+A pre-rendered HTML snapshot of three of this example's sections lives at [`docs/media/demo.html`](../../docs/media/demo.html) (repo-root path). Open it in any browser to see the actual visual output of `/explain-panel`'s HTML standalone variant rendered from this map. The matching screenshot is `docs/media/demo.png`, embedded in the root README.
+
 ## Notes on this example's choices
 
-- **Groups (`ingestion / indexation / retrieval / generation`) are project-specific.** They reflect this RAG pipeline's actual stages. Your own project might have `auth / billing / webhooks` or `scrape / parse / store / serve`. You define them — the schema only enforces 1–8 groups with 1–8 sections each. See [`docs/pipeline-map-format.md`](../../docs/pipeline-map-format.md#groups-array-required-18-items).
+- **Groups (`ingestion / indexation / retrieval / generation`) are project-specific.** They reflect this RAG pipeline's actual stages. Your own project might have `auth / billing / webhooks` or `scrape / parse / store / serve`. You define them — the schema only enforces 1–8 groups with 1–8 sections each. See [`docs/pipeline-map-format.md`](../../docs/pipeline-map-format.md#groups).
 - **Output framework ≠ source framework.** The source here is Python/FastAPI; the panel is React + Tailwind because the original project shipped a React frontend. `/explain-panel` could have generated Vue/Nuxt instead — the panel renderer is decoupled from the language of the code it documents. Pick the variant that matches your app's UI stack, not your backend's language.

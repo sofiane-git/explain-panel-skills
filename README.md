@@ -170,7 +170,7 @@ The schema enforces only:
 
 Pick whatever group names match how *you* explain your project. `auth / billing / webhooks`, `read-path / write-path / background-jobs`, `parse / validate / store / serve` — all valid. `/explore-pipeline` proposes a starting set during the interview; you can override anything before the map is written.
 
-See [`docs/pipeline-map-format.md`](docs/pipeline-map-format.md#groups-array-required-18-items) for the full field reference.
+See [`docs/pipeline-map-format.md`](docs/pipeline-map-format.md#groups) for the full field reference.
 
 ## Source framework ≠ output framework
 
@@ -180,9 +180,12 @@ The panel renderer (React TSX or Vue SFC) is **decoupled** from the language of 
 
 Three reference projects with full `pipeline-map.json` + generated component. They cover the matrix (back-only / full-stack-React / full-stack-Vue) rather than the full list of supported source frameworks — `/explore-pipeline` reads any codebase, so Django / Express / Rails / Spring etc. work without a dedicated example.
 
-- [`examples/fastapi-rag/`](examples/fastapi-rag/) — Python RAG pipeline (FastAPI + ChromaDB + Azure AI). Backend-only source, React output. Source for this kit's authoring story.
+- [`examples/fastapi-rag/`](examples/fastapi-rag/) — Python RAG pipeline (FastAPI + ChromaDB + Azure AI). Backend-only source, React output (the original project shipped a React frontend). Source for this kit's authoring story.
 - [`examples/nextjs-app/`](examples/nextjs-app/) — Next.js full-stack app. Backend = Server Actions + Route Handlers (no separate service). React output.
 - [`examples/nuxt-app/`](examples/nuxt-app/) — Nuxt 3 site. Backend = Nitro `server/api/*` handlers (no separate service). Vue SFC output + plain-CSS variant.
+- [`examples/python-cli/`](examples/python-cli/) — backend-only Python CLI with **no frontend at all** (`framework: "other"`). Demonstrates the HTML standalone auto-fallback: the same `docs/ExplainPanel.html` you see embedded in the [Demo](#demo) above is the output here.
+
+> **The examples are snapshots, not runnable repos.** Each `examples/*/` directory ships a complete `docs/pipeline-map.json` and the corresponding generated component (`components/ExplainPanel.tsx` / `.vue`) so reviewers can see input → output without running the skills themselves. The Python / TS / Vue source files referenced from the maps (`app/ingest/news_api.py`, `app/page.tsx`, `pages/index.vue`, etc.) **do not exist** in the example directories — those paths describe the original projects the examples were authored from. As a consequence, running `/explain-panel` from inside an example directory will fail the audit phase ("file not found"), and that is expected. The examples exist to document the format and the generated output, not to be re-run.
 
 ## Documentation
 

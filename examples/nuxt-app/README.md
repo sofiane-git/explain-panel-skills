@@ -15,8 +15,12 @@ A Nuxt 3 site with Nitro API routes — demonstrates the Vue/Nuxt SFC output and
 - 3 groups: pages / api / state.
 - Plain-CSS variant — no Tailwind dependency.
 
+## Preview
+
+The repo's [root README](../../README.md#demo) embeds a screenshot of the HTML standalone variant rendered from the `fastapi-rag` map. For a live interactive preview, open [`docs/media/demo.html`](../../docs/media/demo.html). For this Nuxt example's SFC output, read [`components/ExplainPanel.vue`](components/ExplainPanel.vue) directly.
+
 ## Notes on this example's choices
 
 - **Backend is included.** Nuxt is full-stack via Nitro: the `api` group documents `server/api/*` handlers (`defineEventHandler`). No separate backend service — Nitro is the backend.
-- **Groups are user-defined.** `pages / api / state` are this project's primary concerns. Your app could use `pages / api / middleware / plugins` or anything else. The schema allows any 1–8 group ids — see [`docs/pipeline-map-format.md`](../../docs/pipeline-map-format.md#groups-array-required-18-items).
+- **Groups are user-defined.** `pages / api / state` are this project's primary concerns. Your app could use `pages / api / middleware / plugins` or anything else. The schema allows any 1–8 group ids — see [`docs/pipeline-map-format.md`](../../docs/pipeline-map-format.md#groups).
 - **Output framework matches the source here** (Vue SFC panel for a Nuxt app), but it doesn't have to. `/explain-panel` can also generate a React panel from a Nuxt codebase — the panel renderer is decoupled from the source framework.

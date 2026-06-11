@@ -21,7 +21,7 @@ Pick group names that match how you'd actually explain the project to a new cont
 
 `/explore-pipeline` proposes a starter set during the interview based on what it finds in the code. You can override every name before the map is written, and you can re-edit `docs/pipeline-map.json` at any time before running `/explain-panel`.
 
-Full field reference: [`pipeline-map-format.md`](pipeline-map-format.md#groups-array-required-18-items).
+Full field reference: [`pipeline-map-format.md`](pipeline-map-format.md#groups).
 
 ## Header text & icon
 
