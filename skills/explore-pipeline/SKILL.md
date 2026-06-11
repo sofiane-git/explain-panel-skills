@@ -248,11 +248,11 @@ Write 5–10 annotations per snippet, keyed by **snippet-relative line numbers**
 
 ### Phase 7 — Decide Header Text
 
-Default header is English: title `"How it works — full data flow"`, icon `📚`. If the project is non-English (check README language, dominant language in code comments), ask: "What language is the project audience? I'll pick a header in that language or you can supply your own."
+Default header is French: title `"Comment ça marche — flux de données complet"`, icon `📚`. If the project audience is clearly different (check README language, dominant language in code comments), ask: "What language is the project audience? I'll pick a header in that language or you can supply your own."
 
 Common headers:
-- English: "How it works — full data flow"
 - French: "Comment ça marche — flux de données complet"
+- English: "How it works — full data flow"
 - Spanish: "Cómo funciona — flujo de datos completo"
 - German: "Wie es funktioniert — vollständiger Datenfluss"
 - Japanese: "仕組み — データフロー全体"

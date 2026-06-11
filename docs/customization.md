@@ -34,7 +34,7 @@ Both are driven by `header.title` and `header.icon` in the map. Set them once du
 }
 ```
 
-The kit ships defaults for English, French, Spanish, German, and Japanese in `/explore-pipeline`. For other languages, type your own when prompted.
+The kit ships defaults for French (default), English, Spanish, German, and Japanese in `/explore-pipeline`. For other languages, type your own when prompted.
 
 ## Group colors
 

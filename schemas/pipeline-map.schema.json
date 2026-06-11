@@ -36,14 +36,14 @@
     },
     "header": {
       "type": "object",
-      "description": "Header text displayed at the top of the generated component. All fields optional — defaults are English.",
+      "description": "Header text displayed at the top of the generated component. All fields optional — defaults are French.",
       "additionalProperties": false,
       "properties": {
         "title": {
           "type": "string",
           "minLength": 1,
           "maxLength": 300,
-          "description": "Title shown above the group chips. Default: 'How it works — full data flow'."
+          "description": "Title shown above the group chips. Default: 'Comment ça marche — flux de données complet'."
         },
         "icon": {
           "type": "string",

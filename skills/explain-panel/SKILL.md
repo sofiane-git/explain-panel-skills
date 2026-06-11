@@ -192,7 +192,7 @@ For custom color objects, concatenate `${color.text} ${color.border} ${color.bg}
 
 For the **HTML standalone** variant, expand preset colors to actual hex values directly (`sky` → `#0ea5e9`, `indigo` → `#6366f1`, `amber` → `#f59e0b`, `emerald` → `#10b981`, `rose` → `#f43f5e`, `violet` → `#8b5cf6`, `cyan` → `#06b6d4`, `fuchsia` → `#d946ef`, `lime` → `#84cc16`, `orange` → `#f97316`, `teal` → `#14b8a6`, `pink` → `#ec4899`). Inject the hex on the chip element via `style="color: <hex>"`. For custom color objects in the map, use the `text` field's hex (or extract from any Tailwind-style arbitrary-value string `text-[#...]`).
 
-**Header text:** read `header.title` and `header.icon` from the map. Fall back to defaults (English) only if both are missing.
+**Header text:** read `header.title` and `header.icon` from the map. Fall back to defaults (French: `"Comment ça marche — flux de données complet"`, icon `📚`) only if both are missing.
 
 **Output path:**
 - React: `<frontend-root>/components/ExplainPanel.tsx`
