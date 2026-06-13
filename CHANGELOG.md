@@ -4,6 +4,8 @@ All notable changes to this project will be documented here. Format follows [Kee
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-06-14
+
 ### Security
 - **Schema: `icon` fields now reject HTML-special and template-literal metacharacters.** Both `header.icon` and `section.icon` gain a `not: { pattern: "[<>\"&\`{}]" }` constraint. The previous `maxLength: 4` alone allowed values like `"><` that could break attribute context in the HTML standalone variant.
 - **Schema: custom `color` object fields (`text`/`border`/`bg`) now bounded and sanitized.** Previously unconstrained (any string, any length). Now `maxLength: 100` and `not: { pattern: "[<>\"&\`{}]" }` reject HTML-special characters and template-literal metacharacters — prevents attribute breakout in `style="color: <value>"` in the HTML standalone variant.
@@ -103,7 +105,8 @@ All notable changes to this project will be documented here. Format follows [Kee
 - Issue templates: bug report, feature request, schema-violation report.
 - Migration scaffold for future schema versions.
 
-[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.2...HEAD
+[Unreleased]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/sofiane-git/explain-panel-skills/compare/v1.0.0...v1.1.0
