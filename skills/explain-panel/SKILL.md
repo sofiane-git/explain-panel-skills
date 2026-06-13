@@ -131,6 +131,21 @@ Detect CSS framework (skip this step for HTML standalone):
 - `tailwindcss` in any `package.json` dep → use Tailwind classes
 - Otherwise → CSS-fallback mode (BEM classes + companion `.css` file)
 
+Detect dark mode strategy (Tailwind variants only; CSS variant uses `prefers-color-scheme` via CSS vars):
+
+```bash
+# check tailwind config for darkMode setting
+grep -r "darkMode" tailwind.config.* 2>/dev/null | head -5
+# check for shadcn/ui or radix-ui (CSS-vars theming)
+grep -E '"@radix-ui|shadcn|cmdk"' package.json 2>/dev/null
+```
+
+| Signal | Strategy | Action |
+|--------|----------|--------|
+| `darkMode: "class"` or `["class", ...]` in tailwind.config | Class-based (`.dark` on `<html>`) | Use `dark:` classes — already correct in templates |
+| `darkMode: "media"` or key absent | OS preference | `dark:` classes still work via `@media` variant — no change needed |
+| `@radix-ui/*`, `shadcn`, or `cmdk` in deps | shadcn/ui CSS vars | Ask: "Your app uses shadcn/ui. Replace the panel's neutral colors with your theme's CSS vars (--background, --card, --border, --muted-foreground)?" If yes, substitute: `bg-white dark:bg-neutral-900` → `bg-card`, `border-black/10 dark:border-white/10` → `border-border`, `text-neutral-600 dark:text-neutral-300` → `text-muted-foreground`, `bg-neutral-50 dark:bg-neutral-950` → `bg-muted/50`, `bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400` → `bg-primary/10 text-primary` |
+
 Detect target directory:
 - React/Vue: prefer `components/` (Next.js, Nuxt, generic). Monorepo with multiple frontend roots → ask which one.
 - HTML standalone: write to `docs/ExplainPanel.html` at the repo root (alongside `docs/pipeline-map.json`). No directory ambiguity — backend-only projects always get a `docs/` dir from `/explore-pipeline`.
@@ -179,6 +194,25 @@ Pick the right template variant. Templates live in this skill's `references/` di
 | Backend-only / HTML standalone | `references/html-standalone.html.template` (pair with `references/html-pre-highlight.md` for the per-language tokenization contract) |
 
 Read the template, then substitute the placeholders listed inside it. Placeholders use `{{ NAME }}` syntax; the template file documents every placeholder and what to fill it with.
+
+**`{{ SECTIONS_ENTRIES }}` — each Section object must include `snippetStart`:**
+
+```ts
+{
+  id: "my-section",
+  icon: "📥",
+  title: "...",
+  module: "...",
+  group: "my-group",
+  language: "python",
+  code: CODE_MY_SECTION,
+  annotations: ANNOT_MY_SECTION,
+  snippetStart: 22,   // ← value of snippet_start from the map
+  summary: "...",     // optional
+}
+```
+
+`snippetStart` drives the code gutter (`startingLineNumber` prop in React, line counter in Vue) and the annotation badge display (file-relative number = `snippetStart + key − 1`). Never omit it — the component will show `NaN` in annotation badges if missing.
 
 **HTML standalone — pre-highlighting:** For the HTML variant, the snippet inside each `<pre><code>` block is pre-tokenized at generation time (no runtime highlighter, no CDN). Follow `references/html-pre-highlight.md` for the exact rules: six token classes (`hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`), per-language matchers, HTML-escaping order, and the sanity checklist. **Never** invent classes outside the six listed there; the template only styles those. When in doubt, leave the token plain — under-coloring is acceptable, mis-coloring is not.
 

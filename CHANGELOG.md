@@ -4,7 +4,11 @@ All notable changes to this project will be documented here. Format follows [Kee
 
 ## [Unreleased]
 
-(No unreleased changes.)
+### Changed
+- **Annotation panel: full UX overhaul across all variants.** Font size increased from 10 px to 12–14 px. Line-reference badges are now square colored boxes instead of plain monospace text. A "Notes" label heads each annotation list. Spacing widened for legibility.
+- **Dark/light mode: annotation panel now theme-aware.** The hardcoded `bg-neutral-900` strip (visible in light mode) is replaced with `bg-neutral-50 dark:bg-neutral-950` (Tailwind) / `var(--explain-surface)` (CSS) so the annotation area adapts to the host app's color scheme. `SKILL.md` Phase 3 now detects dark mode strategy (`tailwind.config` `darkMode` field, shadcn/radix-ui presence) and instructs the generator accordingly.
+- **Line numbers: file-relative throughout.** Code gutters now start at `snippet_start` instead of 1. Annotation badges show the actual file line number (`snippet_start + key − 1`). `html-pre-highlight.md` and all four template variants updated. `snippetStart` added to the `Section` type and documented in `SKILL.md` Phase 6.
+- **`explore-pipeline` Phase 7** now always asks for header language (was conditional on detecting a non-French codebase, which silently skipped the question).
 
 ## [1.1.2] — 2026-06-12
 

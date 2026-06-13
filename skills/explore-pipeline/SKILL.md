@@ -248,7 +248,13 @@ Write 5–10 annotations per snippet, keyed by **snippet-relative line numbers**
 
 ### Phase 7 — Decide Header Text
 
-If `header.title` / `header.icon` are left unset, the renderer falls back to the values declared in the `default` keyword of those properties in `schemas/pipeline-map.schema.json` (currently French — read the schema for the authoritative literal; do not duplicate it here). If the project audience is clearly different (check README language, dominant language in code comments), ask: "What language is the project audience? I'll pick a header in that language or you can supply your own."
+**Always ask this question before writing the header:**
+
+> "What language should I use for the header text? (French / English / Spanish / German / Japanese / other — or paste your own title)"
+
+Do not skip this question even if the codebase appears to be in a single language. The header is user-facing copy and the user must confirm it.
+
+If the user says "default" or doesn't care, fall back to the value declared in the `default` keyword of the `header.title` property in `schemas/pipeline-map.schema.json` (read the schema for the authoritative literal — do not duplicate it here).
 
 Common headers:
 - French: "Comment ça marche — flux de données complet"
@@ -312,7 +318,7 @@ Stop and ask whenever you encounter:
 3. Multiple entry points within a root
 4. Functions spanning >35 lines (which sub-range to show?)
 5. Unfamiliar language not in the schema enum
-6. Non-English project audience (header text language)
+6. Header text language — always ask (Phase 7)
 7. Brand color requirement (custom color object)
 8. Existing `docs/pipeline-map.json` (overwrite vs merge)
 

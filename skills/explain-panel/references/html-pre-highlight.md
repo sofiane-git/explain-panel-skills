@@ -178,16 +178,25 @@ Each source line becomes a single `<span class="ep-line"...>` containing a `<spa
 and the highlighted code. Lines that have an annotation (line number ∈ `section.annotations` keys)
 get an additional `is-annotated` class so the CSS can subtly highlight them.
 
+**Line numbers are FILE-RELATIVE**: the first line of the snippet shows `snippet_start`, the
+second shows `snippet_start + 1`, and so on — so readers can locate the code in their editor.
+Annotation keys in the map are snippet-relative (1-indexed from the snippet start); convert to
+a file-relative badge value with `snippet_start + key − 1`.
+
 ```html
 <pre><code data-lang="python">
-<span class="ep-line"><span class="ep-line-num">5</span><span class="hl-kw">def</span> <span class="hl-fn">parse</span>(text):</span>
-<span class="ep-line is-annotated"><span class="ep-line-num">6</span>    <span class="hl-com"># …</span></span>
+<span class="ep-line"><span class="ep-line-num">22</span><span class="hl-kw">def</span> <span class="hl-fn">parse</span>(text):</span>
+<span class="ep-line is-annotated"><span class="ep-line-num">23</span>    <span class="hl-com"># …</span></span>
 …
 </code></pre>
+<p class="ep-annotations-label">Notes</p>
+<ul class="ep-annotations">
+  <li><span class="ep-line-ref">22</span> Signature explains the entry point…</li>
+  <li><span class="ep-line-ref">26</span> Why this line matters…</li>
+</ul>
 ```
 
-Line numbers shown are the **section-relative** line numbers (1-indexed), matching what the
-annotations key off — same convention as the React/Vue variants.
+(Here `snippet_start = 22`. Annotation key `"5"` maps to file line `22 + 5 − 1 = 26`.)
 
 ## Escaping rules
 
@@ -217,7 +226,7 @@ re-run with a more specific `language` value in the map.
 Before writing `ExplainPanel.html`:
 
 - [ ] Every line of every snippet became exactly one `<span class="ep-line">`.
-- [ ] Every annotation key (e.g. `"5"`) maps to a `is-annotated` line in the snippet.
+- [ ] Every annotation key (e.g. `"5"`) maps to a `is-annotated` line at the correct position in the snippet, and the `ep-line-ref` value shows the file-relative number (`snippet_start + key − 1`).
 - [ ] All `<`, `>`, `&` in code are HTML-escaped.
 - [ ] No `hl-…` class other than the six listed above appears.
 - [ ] The `<details>` blocks are emitted in `groups[].sections[]` order, grouped by `ep-chip` dividers.

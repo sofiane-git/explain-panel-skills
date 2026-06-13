@@ -67,14 +67,16 @@
   .hl-com  { color: var(--ep-hl-com); font-style: italic; }
   .hl-fn   { color: var(--ep-hl-fn); }
   .hl-attr { color: var(--ep-hl-attr); }
-  .ep-annotations { list-style: none; padding: 0; margin: 0; font-size: .85rem; }
-  .ep-annotations li { display: flex; gap: .6rem; padding: .55rem 0; border-block-start: 1px solid var(--ep-border); line-height: 1.45; }
+  .ep-annotations-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--ep-muted); margin: 0 0 .65rem; }
+  .ep-annotations { list-style: none; padding: 0; margin: 0; }
+  .ep-annotations li { display: flex; gap: .75rem; padding: .65rem 0; border-block-start: 1px solid var(--ep-border); line-height: 1.5; font-size: .875rem; align-items: flex-start; }
   .ep-annotations li:first-child { border-block-start: none; padding-block-start: 0; }
   .ep-annotations .ep-line-ref {
-    flex-shrink: 0; display: inline-block; min-width: 2.2em; text-align: center;
-    color: var(--ep-focus); font-family: ui-monospace, monospace; font-size: .72rem; font-weight: 600;
-    padding: .1rem .3rem; border-radius: 4px;
-    background: color-mix(in srgb, var(--ep-focus) 12%, transparent); height: fit-content;
+    flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+    min-width: 2.1em; height: 1.6em;
+    color: var(--ep-focus); font-family: ui-monospace, monospace; font-size: .72rem; font-weight: 700;
+    padding: .1rem .35rem; border-radius: 4px;
+    background: color-mix(in srgb, var(--ep-focus) 12%, transparent);
   }
   footer { color: var(--ep-muted); font-size: .75rem; margin-block-start: 3rem; text-align: center; }
 </style>
@@ -121,11 +123,12 @@
 <span class="ep-line"><span class="ep-line-num">22</span>        )</span>
 <span class="ep-line"><span class="ep-line-num">23</span>    <span class="hl-kw">return</span> self.client.get(<span class="hl-str">&quot;/everything&quot;</span>, params=params)</span></code></pre>
       </div>
+      <p class="ep-annotations-label">Notes</p>
       <ul class="ep-annotations">
-        <li><span class="ep-line-ref">L5</span><span>Dedup by sha256(title+source) — re-ingesting the same article produces the same id, upsert is idempotent.</span></li>
-        <li><span class="ep-line-ref">L10</span><span>Tag fusion: an article retrieved via both Python and AI/ML topics inherits both tags.</span></li>
-        <li><span class="ep-line-ref">L18</span><span>page_size=100 is the NewsAPI free-tier maximum.</span></li>
-        <li><span class="ep-line-ref">L21</span><span>Truncate dates to YYYY-MM-DD — NewsAPI rejects timezone-aware values.</span></li>
+        <li><span class="ep-line-ref">5</span><span>Dedup by sha256(title+source) — re-ingesting the same article produces the same id, upsert is idempotent.</span></li>
+        <li><span class="ep-line-ref">10</span><span>Tag fusion: an article retrieved via both Python and AI/ML topics inherits both tags.</span></li>
+        <li><span class="ep-line-ref">18</span><span>page_size=100 is the NewsAPI free-tier maximum.</span></li>
+        <li><span class="ep-line-ref">21</span><span>Truncate dates to YYYY-MM-DD — NewsAPI rejects timezone-aware values.</span></li>
       </ul>
     </div>
   </details>
@@ -159,10 +162,11 @@
 <span class="ep-line is-annotated"><span class="ep-line-num">15</span>        embedding_function=<span class="hl-kw">None</span>,  <span class="hl-com"># vectors supplied at insert</span></span>
 <span class="ep-line"><span class="ep-line-num">16</span>    )</span></code></pre>
       </div>
+      <p class="ep-annotations-label">Notes</p>
       <ul class="ep-annotations">
-        <li><span class="ep-line-ref">L1</span><span>lru_cache(maxsize=1): one HTTP client for the whole process lifetime.</span></li>
-        <li><span class="ep-line-ref">L11</span><span>hnsw:space='cosine' — without this, ChromaDB defaults to L2 (Euclidean), which behaves differently for variable-length text.</span></li>
-        <li><span class="ep-line-ref">L15</span><span>HNSW is a logarithmic-time graph index — fast lookup across millions of vectors.</span></li>
+        <li><span class="ep-line-ref">1</span><span>lru_cache(maxsize=1): one HTTP client for the whole process lifetime.</span></li>
+        <li><span class="ep-line-ref">11</span><span>hnsw:space='cosine' — without this, ChromaDB defaults to L2 (Euclidean), which behaves differently for variable-length text.</span></li>
+        <li><span class="ep-line-ref">15</span><span>HNSW is a logarithmic-time graph index — fast lookup across millions of vectors.</span></li>
       </ul>
     </div>
   </details>
@@ -200,11 +204,12 @@
 <span class="ep-line"><span class="ep-line-num">19</span>        )</span>
 <span class="ep-line"><span class="ep-line-num">20</span>    ]</span></code></pre>
       </div>
+      <p class="ep-annotations-label">Notes</p>
       <ul class="ep-annotations">
-        <li><span class="ep-line-ref">L4</span><span>embed() — Azure AI Inference, same model used at ingest time. Symmetry matters.</span></li>
-        <li><span class="ep-line-ref">L7</span><span>n_results=k — ChromaDB always returns k, distances tell you whether to trust them.</span></li>
-        <li><span class="ep-line-ref">L9</span><span>Distances must be requested explicitly — they're not in the default include set.</span></li>
-        <li><span class="ep-line-ref">L16</span><span>Truncate to 2000 chars before embedding — avoid the model's token cap silently.</span></li>
+        <li><span class="ep-line-ref">4</span><span>embed() — Azure AI Inference, same model used at ingest time. Symmetry matters.</span></li>
+        <li><span class="ep-line-ref">7</span><span>n_results=k — ChromaDB always returns k, distances tell you whether to trust them.</span></li>
+        <li><span class="ep-line-ref">9</span><span>Distances must be requested explicitly — they're not in the default include set.</span></li>
+        <li><span class="ep-line-ref">16</span><span>Truncate to 2000 chars before embedding — avoid the model's token cap silently.</span></li>
       </ul>
     </div>
   </details>
