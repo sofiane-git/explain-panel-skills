@@ -256,8 +256,7 @@ Do not skip this question even if the codebase appears to be in a single languag
 
 If the user says "default" or doesn't care, fall back to the value declared in the `default` keyword of the `header.title` property in `schemas/pipeline-map.schema.json` (read the schema for the authoritative literal — do not duplicate it here).
 
-Common headers:
-- French: "Comment ça marche — flux de données complet"
+Common non-default headers (French is the schema default — read it from the schema rather than duplicating it here):
 - English: "How it works — full data flow"
 - Spanish: "Cómo funciona — flujo de datos completo"
 - German: "Wie es funktioniert — vollständiger Datenfluss"

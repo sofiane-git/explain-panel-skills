@@ -164,11 +164,15 @@ The skill reads every `file` path in the map and cross-checks the snippet agains
 
 The skill scans for modules referenced in group summaries or annotations that don't appear as sections in the map. It lists any gaps and asks whether to add them or mark them as intentionally excluded.
 
-**Then: output selection (no question needed)**
+**Then: output target detection**
 
-If the framework is React or Vue, the skill writes `components/ExplainPanel.tsx` (or `.vue`) plus, for the plain-CSS variant, a companion `components/ExplainPanel.css`. If no frontend framework was detected, it writes `docs/ExplainPanel.html` — a single self-contained file with no build step required.
+The skill reads the `framework` field from the map, then probes the project for confirmation signals (config files, `package.json` deps). For standard setups this is automatic:
 
-No further questions after the two passes. The component is ready to import (or open directly for the HTML variant).
+- React / Next.js → `components/ExplainPanel.tsx`
+- Vue / Nuxt → `components/ExplainPanel.vue` (+ `ExplainPanel.css` for the plain-CSS variant)
+- No frontend detected → `docs/ExplainPanel.html` (self-contained, no build step)
+
+For ambiguous setups — e.g. a monorepo with multiple frontend roots, or a `framework: "other"` map that also has a `web/` directory — the skill asks which root to target before generating. Standard projects get no further questions; the component is ready to import (or open directly for the HTML variant).
 
 ---
 

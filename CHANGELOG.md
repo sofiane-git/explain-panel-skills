@@ -7,6 +7,10 @@ All notable changes to this project will be documented here. Format follows [Kee
 ### Added
 - **README: beginner walkthrough section.** New "Walkthrough — what the skills ask you" section documents every question posed by `/explore-pipeline` (7 questions: monorepo detection, framework, groups, files per group, titles/icons/summaries, annotations, header language) and `/explain-panel` (2 confirmation passes: drift audit + missing-module sweep), with plain-language explanations of why each question exists and what to answer.
 
+### Fixed
+- **`explore-pipeline` SKILL.md: French default no longer duplicated in "Common headers" list.** The list entry `French: "Comment ça marche…"` violated the single-source-of-truth invariant (schema `default` keyword is authoritative). The French entry is removed; the label now directs Claude to read the schema. Non-default translations (EN/ES/DE/JA) are unchanged.
+- **README walkthrough: output target section now accurate for ambiguous setups.** The previous wording said "/explain-panel asks no further questions after 2 passes" — false for monorepos with multiple frontend roots or `framework: "other"` maps that also contain a `web/` dir. The section now describes the automatic path and the one case that prompts.
+
 ### Changed
 - **Annotation panel: full UX overhaul across all variants.** Font size increased from 10 px to 12–14 px. Line-reference badges are now square colored boxes instead of plain monospace text. A "Notes" label heads each annotation list. Spacing widened for legibility.
 - **Dark/light mode: annotation panel now theme-aware.** The hardcoded `bg-neutral-900` strip (visible in light mode) is replaced with `bg-neutral-50 dark:bg-neutral-950` (Tailwind) / `var(--explain-surface)` (CSS) so the annotation area adapts to the host app's color scheme. `SKILL.md` Phase 3 now detects dark mode strategy (`tailwind.config` `darkMode` field, shadcn/radix-ui presence) and instructs the generator accordingly.
