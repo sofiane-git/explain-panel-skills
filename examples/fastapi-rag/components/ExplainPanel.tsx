@@ -38,6 +38,7 @@ type Section = {
   language: string;
   code: string;
   annotations: Record<number, string>;
+  snippetStart: number;
   summary?: string;
 };
 
@@ -47,21 +48,24 @@ function CodeBlock({
   code,
   language,
   annotations,
+  snippetStart,
 }: {
   code: string;
   language: string;
   annotations?: Record<number, string>;
+  snippetStart: number;
 }) {
   return (
-    <div className="relative mt-2 rounded-lg overflow-hidden text-[11px]">
+    <div className="relative mt-2 rounded-lg overflow-hidden">
       <SyntaxHighlighter
         language={language}
         style={vscDarkPlus}
         customStyle={{ margin: 0, borderRadius: "0.5rem", fontSize: "11px", lineHeight: "1.6" }}
         showLineNumbers
+        startingLineNumber={snippetStart}
         wrapLines
         lineProps={(n: number) =>
-          annotations?.[n]
+          annotations?.[n - snippetStart + 1]
             ? { style: { background: "rgba(99,102,241,0.15)", display: "block" } }
             : { style: { display: "block" } }
         }
@@ -69,11 +73,14 @@ function CodeBlock({
         {code}
       </SyntaxHighlighter>
       {annotations && Object.keys(annotations).length > 0 && (
-        <div className="bg-neutral-900 border-t border-white/5 px-3 py-2 space-y-1">
+        <div className="bg-neutral-50 dark:bg-neutral-950 border-t border-black/10 dark:border-white/10 px-4 pt-3 pb-4 space-y-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-1">Notes</p>
           {Object.entries(annotations).map(([line, note]) => (
-            <div key={line} className="flex gap-2 text-[10px]">
-              <span className="shrink-0 font-mono text-indigo-400">L{line}</span>
-              <span className="text-neutral-400">{note}</span>
+            <div key={line} className="flex gap-3 text-xs">
+              <span className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded font-mono text-[10px] font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 mt-0.5">
+                {snippetStart + parseInt(line) - 1}
+              </span>
+              <span className="text-neutral-600 dark:text-neutral-300 leading-relaxed">{note}</span>
             </div>
           ))}
         </div>
@@ -301,39 +308,39 @@ const ANNOT_RESULTS: Record<number, string> = {
 const SECTIONS: Section[] = [
   { id: "news-api-ingest", icon: "📥", title: "NewsAPI Ingester",
     module: "app/ingest/news_api.py · NewsApiIngester.run()", group: "ingestion",
-    language: "python", code: CODE_NEWS_API_INGEST, annotations: ANNOT_NEWS_API_INGEST,
+    language: "python", code: CODE_NEWS_API_INGEST, annotations: ANNOT_NEWS_API_INGEST, snippetStart: 12,
     summary: "Pulls articles from NewsAPI for one or more topics, deduplicates by sha256, and merges tags when an article matches multiple topics." },
   { id: "scraper", icon: "🕷️", title: "HTML Scraping & Cleaning",
     module: "app/ingest/scraper.py · Scraper._fetch()", group: "ingestion",
-    language: "python", code: CODE_SCRAPER, annotations: ANNOT_SCRAPER,
+    language: "python", code: CODE_SCRAPER, annotations: ANNOT_SCRAPER, snippetStart: 22,
     summary: "NewsAPI returns ~200 chars. The scraper fetches full HTML, strips boilerplate, converts to Markdown." },
   { id: "ingest-pipeline", icon: "🏗️", title: "Embedding & Indexation Pipeline",
     module: "app/ingest/pipeline.py · ingest()", group: "indexation",
-    language: "python", code: CODE_INGEST_PIPELINE, annotations: ANNOT_INGEST_PIPELINE,
+    language: "python", code: CODE_INGEST_PIPELINE, annotations: ANNOT_INGEST_PIPELINE, snippetStart: 1,
     summary: "Splits articles into chunks, embeds them, upserts into ChromaDB." },
   { id: "chroma", icon: "🗄️", title: "ChromaDB client & cosine space",
     module: "app/rag/chroma_client.py · get_collection()", group: "indexation",
-    language: "python", code: CODE_CHROMA, annotations: ANNOT_CHROMA,
+    language: "python", code: CODE_CHROMA, annotations: ANNOT_CHROMA, snippetStart: 4,
     summary: "Shared HNSW collection configured with cosine similarity." },
   { id: "orchestration", icon: "🗺️", title: "Chat orchestration",
     module: "app/chat.py · handle_chat()", group: "retrieval",
-    language: "python", code: CODE_ORCHESTRATION, annotations: ANNOT_ORCHESTRATION,
+    language: "python", code: CODE_ORCHESTRATION, annotations: ANNOT_ORCHESTRATION, snippetStart: 28,
     summary: "handle_chat() runs five sequential steps." },
   { id: "rag", icon: "🔍", title: "Vector search (RAG)",
     module: "app/rag/retrieval.py · retrieve()", group: "retrieval",
-    language: "python", code: CODE_RAG, annotations: ANNOT_RAG,
+    language: "python", code: CODE_RAG, annotations: ANNOT_RAG, snippetStart: 12,
     summary: "Embeds the query and asks ChromaDB for the 8 nearest neighbours by cosine distance." },
   { id: "enrich", icon: "📄", title: "Chunk enrichment",
     module: "app/ingest/enrich.py · enrich_retrieval()", group: "retrieval",
-    language: "python", code: CODE_ENRICH, annotations: ANNOT_ENRICH,
+    language: "python", code: CODE_ENRICH, annotations: ANNOT_ENRICH, snippetStart: 8,
     summary: "Reconstructs full articles for the top 5 retrieved chunks." },
   { id: "llm", icon: "🤖", title: "LLM synthesis",
     module: "app/rag/llm.py · compose_answer()", group: "generation",
-    language: "python", code: CODE_LLM, annotations: ANNOT_LLM,
+    language: "python", code: CODE_LLM, annotations: ANNOT_LLM, snippetStart: 32,
     summary: "Builds the payload, calls Azure AI Inference with JSON-strict output." },
   { id: "results", icon: "📊", title: "Card construction",
     module: "app/rag/llm.py · _build_cards()", group: "generation",
-    language: "python", code: CODE_RESULTS, annotations: ANNOT_RESULTS,
+    language: "python", code: CODE_RESULTS, annotations: ANNOT_RESULTS, snippetStart: 78,
     summary: "Turns retrieved chunks and fresh articles into ArticleCard objects." },
 ];
 
@@ -436,6 +443,7 @@ export default function ExplainPanel() {
                       code={section.code}
                       language={section.language}
                       annotations={section.annotations}
+                      snippetStart={section.snippetStart}
                     />
                   </div>
                 </div>

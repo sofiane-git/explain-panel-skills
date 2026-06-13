@@ -20,6 +20,7 @@ type Section = {
   language: string
   code: string
   annotations: Record<number, string>
+  snippetStart: number
   summary?: string
 }
 
@@ -112,19 +113,19 @@ const ANNOT_FAVORITES_STORE: Record<number, string> = {
 const SECTIONS: Section[] = [
   { id: 'home-page', icon: '🏠', title: 'Home page',
     module: 'pages/index.vue · <script setup>', group: 'pages',
-    language: 'vue', code: CODE_HOME_PAGE, annotations: ANNOT_HOME_PAGE,
+    language: 'vue', code: CODE_HOME_PAGE, annotations: ANNOT_HOME_PAGE, snippetStart: 1,
     summary: 'File-based route at /. Uses useFetch to populate the recipe list.' },
   { id: 'recipes-handler', icon: '🥘', title: 'Recipes Nitro handler',
     module: 'server/api/recipes.get.ts · defineEventHandler()', group: 'api',
-    language: 'typescript', code: CODE_RECIPES_HANDLER, annotations: ANNOT_RECIPES_HANDLER,
+    language: 'typescript', code: CODE_RECIPES_HANDLER, annotations: ANNOT_RECIPES_HANDLER, snippetStart: 4,
     summary: 'Server route handling GET /api/recipes.' },
   { id: 'create-handler', icon: '➕', title: 'Create recipe handler',
     module: 'server/api/recipes.post.ts · defineEventHandler()', group: 'api',
-    language: 'typescript', code: CODE_CREATE_HANDLER, annotations: ANNOT_CREATE_HANDLER,
+    language: 'typescript', code: CODE_CREATE_HANDLER, annotations: ANNOT_CREATE_HANDLER, snippetStart: 6,
     summary: 'POST /api/recipes — validates with Valibot, writes to KV, broadcasts via WebSockets.' },
   { id: 'favorites-store', icon: '⭐', title: 'Favorites store (Pinia)',
     module: 'stores/favorites.ts · useFavoritesStore()', group: 'state',
-    language: 'typescript', code: CODE_FAVORITES_STORE, annotations: ANNOT_FAVORITES_STORE,
+    language: 'typescript', code: CODE_FAVORITES_STORE, annotations: ANNOT_FAVORITES_STORE, snippetStart: 4,
     summary: 'Pinia setup store storing favourite recipe ids in localStorage.' },
 ]
 
@@ -227,12 +228,13 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
                   v-if="Object.keys(section.annotations).length > 0"
                   class="explain-panel__annotations"
                 >
+                  <p class="explain-panel__annotations-label">Notes</p>
                   <div
                     v-for="(note, line) in section.annotations"
                     :key="line"
                     class="explain-panel__annotation"
                   >
-                    <span class="explain-panel__annotation-line">L{{ line }}</span>
+                    <span class="explain-panel__annotation-line">{{ section.snippetStart + Number(line) - 1 }}</span>
                     <span class="explain-panel__annotation-note">{{ note }}</span>
                   </div>
                 </div>

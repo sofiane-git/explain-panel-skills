@@ -21,6 +21,7 @@ type Section = {
   language: string
   code: string
   annotations: Record<number, string>
+  snippetStart: number
   summary?: string
 }
 
@@ -130,12 +131,13 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
                   v-if="Object.keys(section.annotations).length > 0"
                   class="explain-panel__annotations"
                 >
+                  <p class="explain-panel__annotations-label">Notes</p>
                   <div
                     v-for="(note, line) in section.annotations"
                     :key="line"
                     class="explain-panel__annotation"
                   >
-                    <span class="explain-panel__annotation-line">L{{ line }}</span>
+                    <span class="explain-panel__annotation-line">{{ section.snippetStart + Number(line) - 1 }}</span>
                     <span class="explain-panel__annotation-note">{{ note }}</span>
                   </div>
                 </div>

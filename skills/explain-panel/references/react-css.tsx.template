@@ -32,6 +32,7 @@ type Section = {
   language: string;
   code: string;
   annotations: Record<number, string>;
+  snippetStart: number;
   summary?: string;
 };
 
@@ -39,10 +40,12 @@ function CodeBlock({
   code,
   language,
   annotations,
+  snippetStart,
 }: {
   code: string;
   language: string;
   annotations?: Record<number, string>;
+  snippetStart: number;
 }) {
   return (
     <div className="explain-panel__code-block">
@@ -51,18 +54,20 @@ function CodeBlock({
         style={vscDarkPlus}
         customStyle={{ margin: 0, fontSize: "11px", lineHeight: 1.6 }}
         showLineNumbers
+        startingLineNumber={snippetStart}
         wrapLines
         lineProps={(n: number) => ({
-          className: annotations?.[n] ? "line annotated" : "line",
+          className: annotations?.[n - snippetStart + 1] ? "line annotated" : "line",
         })}
       >
         {code}
       </SyntaxHighlighter>
       {annotations && Object.keys(annotations).length > 0 && (
         <div className="explain-panel__annotations">
+          <p className="explain-panel__annotations-label">Notes</p>
           {Object.entries(annotations).map(([line, note]) => (
             <div key={line} className="explain-panel__annotation">
-              <span className="explain-panel__annotation-line">L{line}</span>
+              <span className="explain-panel__annotation-line">{snippetStart + parseInt(line) - 1}</span>
               <span className="explain-panel__annotation-note">{note}</span>
             </div>
           ))}
@@ -161,6 +166,7 @@ export default function ExplainPanel() {
                     code={section.code}
                     language={section.language}
                     annotations={section.annotations}
+                    snippetStart={section.snippetStart}
                   />
                 </div>
               </div>

@@ -21,21 +21,21 @@ const GROUP_LABELS: Record<Group, { label: string; color: string }> = {
 type Section = {
   id: SectionId; icon: string; title: string; module: string;
   group: Group; language: string; code: string;
-  annotations: Record<number, string>; summary?: string;
+  annotations: Record<number, string>; snippetStart: number; summary?: string;
 };
 
-function CodeBlock({ code, language, annotations }: {
-  code: string; language: string; annotations?: Record<number, string>;
+function CodeBlock({ code, language, annotations, snippetStart }: {
+  code: string; language: string; annotations?: Record<number, string>; snippetStart: number;
 }) {
   return (
-    <div className="relative mt-2 rounded-lg overflow-hidden text-[11px]">
+    <div className="relative mt-2 rounded-lg overflow-hidden">
       <SyntaxHighlighter
         language={language}
         style={vscDarkPlus}
         customStyle={{ margin: 0, borderRadius: "0.5rem", fontSize: "11px", lineHeight: "1.6" }}
-        showLineNumbers wrapLines
+        showLineNumbers startingLineNumber={snippetStart} wrapLines
         lineProps={(n: number) =>
-          annotations?.[n]
+          annotations?.[n - snippetStart + 1]
             ? { style: { background: "rgba(99,102,241,0.15)", display: "block" } }
             : { style: { display: "block" } }
         }
@@ -43,11 +43,14 @@ function CodeBlock({ code, language, annotations }: {
         {code}
       </SyntaxHighlighter>
       {annotations && Object.keys(annotations).length > 0 && (
-        <div className="bg-neutral-900 border-t border-white/5 px-3 py-2 space-y-1">
+        <div className="bg-neutral-50 dark:bg-neutral-950 border-t border-black/10 dark:border-white/10 px-4 pt-3 pb-4 space-y-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-1">Notes</p>
           {Object.entries(annotations).map(([line, note]) => (
-            <div key={line} className="flex gap-2 text-[10px]">
-              <span className="shrink-0 font-mono text-indigo-400">L{line}</span>
-              <span className="text-neutral-400">{note}</span>
+            <div key={line} className="flex gap-3 text-xs">
+              <span className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded font-mono text-[10px] font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 mt-0.5">
+                {snippetStart + parseInt(line) - 1}
+              </span>
+              <span className="text-neutral-600 dark:text-neutral-300 leading-relaxed">{note}</span>
             </div>
           ))}
         </div>
@@ -140,19 +143,19 @@ const ANNOT_CREATE_NOTE = {
 const SECTIONS: Section[] = [
   { id: "page", icon: "🚪", title: "App Router page",
     module: "app/page.tsx · Page()", group: "routing",
-    language: "tsx", code: CODE_PAGE, annotations: ANNOT_PAGE,
+    language: "tsx", code: CODE_PAGE, annotations: ANNOT_PAGE, snippetStart: 5,
     summary: "Default landing page — fetches notes server-side and renders the list." },
   { id: "layout", icon: "🎨", title: "Root layout",
     module: "app/layout.tsx · RootLayout()", group: "routing",
-    language: "tsx", code: CODE_LAYOUT, annotations: ANNOT_LAYOUT,
+    language: "tsx", code: CODE_LAYOUT, annotations: ANNOT_LAYOUT, snippetStart: 8,
     summary: "Provides the HTML shell, font, and ThemeProvider." },
   { id: "fetch-notes", icon: "📥", title: "Note query",
     module: "lib/notes.ts · getNotes()", group: "data",
-    language: "typescript", code: CODE_FETCH_NOTES, annotations: ANNOT_FETCH_NOTES,
+    language: "typescript", code: CODE_FETCH_NOTES, annotations: ANNOT_FETCH_NOTES, snippetStart: 5,
     summary: "Drizzle ORM call wrapped in a memoised function." },
   { id: "create-note", icon: "✏️", title: "Create note action",
     module: "app/actions.ts · createNote()", group: "mutations",
-    language: "typescript", code: CODE_CREATE_NOTE, annotations: ANNOT_CREATE_NOTE,
+    language: "typescript", code: CODE_CREATE_NOTE, annotations: ANNOT_CREATE_NOTE, snippetStart: 8,
     summary: "Server action invoked from the client form." },
 ];
 
@@ -228,7 +231,7 @@ export default function ExplainPanel() {
                 <div className="overflow-hidden">
                   <div className="px-4 pb-4 pt-2 space-y-3 text-sm text-neutral-600 dark:text-neutral-300">
                     {section.summary && <p>{section.summary}</p>}
-                    <CodeBlock code={section.code} language={section.language} annotations={section.annotations} />
+                    <CodeBlock code={section.code} language={section.language} annotations={section.annotations} snippetStart={section.snippetStart} />
                   </div>
                 </div>
               </div>
