@@ -116,6 +116,62 @@ Example (French — see [`examples/fastapi-rag/docs/pipeline-map.json`](examples
 
 **Multi-language panel (rare)** — see [`docs/customization.md#i18n-beyond-the-header`](docs/customization.md#i18n-beyond-the-header). Short version: generate one map per locale (`pipeline-map.fr.json`, `pipeline-map.en.json`), produce one component per locale, switch on your app's current locale.
 
+## Walkthrough — what the skills ask you
+
+A beginner-friendly guide to every question both skills pose, in the order they appear.
+
+### `/explore-pipeline` — 5 to 7 questions
+
+**1. Is this a monorepo?**
+
+The skill looks for `package.json` workspaces, `pnpm-workspace.yaml`, `turbo.json`, `Cargo.toml [workspace]`, etc. If it detects one, it lists the roots it found and asks which to include. Answer with the numbers of the roots that contain your pipeline's code. For a standard single-package repo, the skill skips this step automatically.
+
+**2. What is the primary framework / stack?**
+
+Used to decide the output format: React TSX (Next.js / React + Vite), Vue SFC (Nuxt / Vue + Vite), or HTML standalone (everything else). If your project has both a backend and a frontend, pick the frontend framework — the panel will live there. If there is no frontend, say so and the skill will produce a self-contained `docs/ExplainPanel.html`.
+
+**3. What are the pipeline groups (stages)?**
+
+Groups are the top-level phases of your data flow — typically 2 to 5 of them. Examples: `ingestion / processing / API`, `auth / billing / webhooks`, `read / write / background`. The skill proposes a starting set based on what it found in the codebase; you can rename, reorder, or replace them entirely. Each group gets a color chip in the panel header and a colored divider in the accordion list.
+
+**4. For each group: which files / modules belong here?**
+
+For each group, the skill asks you to confirm (or override) the files it identified as representative of that stage. It then picks a 15–35 line snippet from each file — the most illustrative block, not necessarily the top of the file. You can redirect it to a different function or line range if the default choice isn't the right one.
+
+**5. Per section: title, icon, and one-line summary**
+
+For each file/snippet, the skill proposes a short title (e.g. "Recipes Nitro handler"), an emoji icon, and a one-sentence summary of what the snippet does. Accept the defaults or type your own. These strings go directly into the generated component — no post-processing.
+
+**6. Annotations: which lines to call out?**
+
+The skill identifies the lines inside each snippet that carry the most weight (a key invariant, an unusual pattern, a non-obvious constraint) and drafts annotation text for each. You can accept, edit, or skip any annotation. Annotations appear below the code block as colored line badges with explanatory text. Aim for 2–5 per section — more than that becomes noise.
+
+**7. Header language**
+
+The panel header (e.g. `"Comment ça marche — flux de données complet"` in French) and all user-visible text come from `docs/pipeline-map.json` — the renderer never translates anything. The skill asks which language to use for the header title. Answer `fr`, `en`, `es`, `de`, `ja`, or type any locale string freely. All other text (section titles, summaries, annotations) must be written in that language when you answer questions 3–6 above.
+
+After all questions, the skill writes `docs/pipeline-map.json`. **Review and hand-edit this file before running `/explain-panel`** — it is plain JSON, easy to tweak, and version-controllable.
+
+---
+
+### `/explain-panel` — 2 confirmation passes, then done
+
+**Pass 1 — drift audit**
+
+The skill reads every `file` path in the map and cross-checks the snippet against the live code. If a file has moved, a function has been renamed, or the line range no longer exists, it reports the drift and asks you to confirm or update the map entry before continuing. This prevents the panel from shipping stale code.
+
+**Pass 2 — missing-module sweep**
+
+The skill scans for modules referenced in group summaries or annotations that don't appear as sections in the map. It lists any gaps and asks whether to add them or mark them as intentionally excluded.
+
+**Then: output selection (no question needed)**
+
+If the framework is React or Vue, the skill writes `components/ExplainPanel.tsx` (or `.vue`) plus, for the plain-CSS variant, a companion `components/ExplainPanel.css`. If no frontend framework was detected, it writes `docs/ExplainPanel.html` — a single self-contained file with no build step required.
+
+No further questions after the two passes. The component is ready to import (or open directly for the HTML variant).
+
+---
+
 ## Demo
 
 ![ExplainPanel — three groups of an example FastAPI RAG pipeline with pre-highlighted Python and side-by-side per-line annotations](docs/media/demo.png)
