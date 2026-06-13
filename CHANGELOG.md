@@ -4,6 +4,15 @@ All notable changes to this project will be documented here. Format follows [Kee
 
 ## [Unreleased]
 
+### Security
+- **Schema: `icon` fields now reject HTML-special and template-literal metacharacters.** Both `header.icon` and `section.icon` gain a `not: { pattern: "[<>\"&\`{}]" }` constraint. The previous `maxLength: 4` alone allowed values like `"><` that could break attribute context in the HTML standalone variant.
+- **Schema: custom `color` object fields (`text`/`border`/`bg`) now bounded and sanitized.** Previously unconstrained (any string, any length). Now `maxLength: 100` and `not: { pattern: "[<>\"&\`{}]" }` reject HTML-special characters and template-literal metacharacters — prevents attribute breakout in `style="color: <value>"` in the HTML standalone variant.
+- **`/explain-panel` Phase 4: escape mandate extended to all user-controlled JS string literals.** Previously only snippet code (the `CODE_*` template literals) was required to escape backticks and `${`. Now `title`, `module`, `summary`, `group.label`, `header.title`, `header.icon`, `section.icon`, and annotation values embedded as JS literals must use `JSON.stringify(value)` — escape-correct by construction, no hand-quoting.
+- **`/explain-panel` Phase 2 Pass A: symlink escape check added.** Schema patterns block `..` and absolute paths syntactically but cannot detect committed symlinks pointing outside the repo. Phase 2 now runs `realpath` on every `file` entry and rejects any path whose resolved target is outside `$(pwd -P)`.
+- **`/explain-panel` Phase 6 HTML escape mandate: `section.icon` and `group.color` added.** Both were omitted from the enumerated list of strings requiring HTML-escaping before injection into the standalone template.
+- **`/explain-panel` Phase 7 XSS scan: pass 4 added (`<style>`), `data:text/html` added to pass 1.** `<style>` injection (CSS `@import` exfiltration, content spoofing) was not caught by the previous three-pass scan. Pass 1 now also detects `data:text/html` URI schemes. Pass 4 asserts exactly one `<style>` block (the template's own stylesheet).
+- **Schema: `file` and `roots[]` descriptions corrected.** Previous wording overclaimed ("prevents … read files outside the repo") — schema patterns enforce syntactic containment only. Symlink-target verification happens at audit time (Phase 2 Pass A above).
+
 ### Added
 - **README: beginner walkthrough section.** New "Walkthrough — what the skills ask you" section documents every question posed by `/explore-pipeline` (7 questions: monorepo detection, framework, groups, files per group, titles/icons/summaries, annotations, header language) and `/explain-panel` (2 confirmation passes: drift audit + missing-module sweep), with plain-language explanations of why each question exists and what to answer.
 

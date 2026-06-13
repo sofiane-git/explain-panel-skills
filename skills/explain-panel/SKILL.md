@@ -51,6 +51,13 @@ Audit the map against the live codebase in two passes. Output a single structure
 For every section:
 
 1. **File present?** `ls <file>` — flag missing files.
+1b. **Symlink safe?** If `<file>` resolves through a symlink, verify its real path stays inside the repo root — the schema pattern blocks `..` and `/` syntactically but cannot detect symlinks committed inside the repo that point outside it:
+    ```bash
+    real=$(realpath "<file>" 2>/dev/null)
+    [ -z "$real" ] && flag "cannot resolve path"
+    printf '%s\n' "$real" | grep -q "^$(pwd -P)/" || flag "symlink target escapes repo root — refuse to read"
+    ```
+    Reject any file whose resolved path is outside `$(pwd -P)`. A `src/secrets → /etc/passwd` symlink has a schema-valid relative path but reads outside the repo.
 2. **Line range valid?** `wc -l <file>` ≥ `snippet_end`, and `snippet_start ≤ snippet_end`.
 3. **Function found?** Search the snippet range for `function`'s name. If absent, the range probably drifted — propose a corrected range.
 4. **Annotation lines in range?** Every annotation key must be in `1..(snippet_end - snippet_start + 1)`. Annotations beyond that get silently dropped by the renderer — surface them as errors.
@@ -152,10 +159,15 @@ Detect target directory:
 
 ### Phase 4 — Read Snippets
 
-For each section, read `<file>` lines `snippet_start..snippet_end` using the `Read` tool with `offset` and `limit`. Store the raw text as a string. Apply this escape transform before embedding into the generated source:
+For each section, read `<file>` lines `snippet_start..snippet_end` using the `Read` tool with `offset` and `limit`. Store the raw text as a string.
 
+**Escape transforms — apply before embedding into the generated source:**
+
+*Snippet code* (embedded as a JS template literal, i.e. the `CODE_*` constant is wrapped in backticks):
 - Replace every `` ` `` (backtick) with `` \` ``.
 - Replace every `${` with `\${`.
+
+*All other user-controlled strings* — `title`, `module`, `summary`, `group.label`, `header.title`, `header.icon`, `section.icon`, and every annotation value — are embedded as JS string literals in `SECTIONS_ENTRIES` / `GROUP_LABELS` / `ANNOT_*`. **Use `JSON.stringify(value)` to produce the literal.** This is escape-correct by construction: it handles backticks, `${`, quotes, backslashes, and Unicode in one step. Never hand-quote these values with a template literal or string concatenation — missing a single backtick or `${` in a user-supplied string turns the generated component into a JS-injection vector.
 
 If a file is missing despite passing audit (race with user edits), warn and skip the section — do not fail the whole generation.
 
@@ -216,7 +228,7 @@ Read the template, then substitute the placeholders listed inside it. Placeholde
 
 **HTML standalone — pre-highlighting:** For the HTML variant, the snippet inside each `<pre><code>` block is pre-tokenized at generation time (no runtime highlighter, no CDN). Follow `references/html-pre-highlight.md` for the exact rules: six token classes (`hl-kw`, `hl-str`, `hl-num`, `hl-com`, `hl-fn`, `hl-attr`), per-language matchers, HTML-escaping order, and the sanity checklist. **Never** invent classes outside the six listed there; the template only styles those. When in doubt, leave the token plain — under-coloring is acceptable, mis-coloring is not.
 
-**HTML standalone — escape every user-controlled string before injection.** `header.title`, `header.icon`, every `section.title` / `summary` / `module`, every `group.label`, and every value in `annotations` must be HTML-escaped (`&` → `&amp;`, `<` → `&lt;`, `>` → `&gt;`, `"` → `&quot;` when injected into an attribute) before being substituted into the template. The schema bounds string length and rejects path-traversal in `file`, but it does **not** sanitize HTML — that is this skill's responsibility. Skipping the escape lets a malicious or hand-edited map inject `<script>`, `<iframe srcdoc>`, `<svg onload>`, or event-handler attributes into the rendered file. The Phase 7 XSS scan is the safety net, not the primary defense.
+**HTML standalone — escape every user-controlled string before injection.** `header.title`, `header.icon`, `section.icon`, every `section.title` / `summary` / `module`, every `group.label`, every `group.color` custom-object field (`text`/`border`/`bg`) when placed inside a `style=` attribute, and every value in `annotations` must be HTML-escaped (`&` → `&amp;`, `<` → `&lt;`, `>` → `&gt;`, `"` → `&quot;` when injected into an attribute) before being substituted into the template. The schema bounds string length and rejects path-traversal in `file`, but it does **not** sanitize HTML — that is this skill's responsibility. Skipping the escape lets a malicious or hand-edited map inject `<script>`, `<iframe srcdoc>`, `<svg onload>`, or event-handler attributes into the rendered file. The Phase 7 XSS scan is the safety net, not the primary defense.
 
 **Color expansion (React/Vue only):** Preset color names in the map expand as follows. Pre-compute the expansion for every group before writing the file.
 
@@ -255,7 +267,7 @@ Run before reporting.
 - [ ] `GROUP_ORDER[]` covers every group in `GROUP_LABELS`.
 - [ ] ARIA: every accordion button has `aria-expanded` and `aria-controls`; every panel has `role="region"` and `aria-labelledby`.
 - [ ] Keyboard: `Escape` closes the active panel; the button is focusable; `Enter`/`Space` toggles it. (Native `<button>` covers Enter/Space; Escape needs the handler in the template.)
-- [ ] No raw backticks or unescaped `${` inside `CODE_*` constants.
+- [ ] No raw backticks or unescaped `${` inside any generated string literal — `CODE_*` constants, `title`, `module`, `summary`, `group.label`, annotation values, `header.title`, `section.icon`. If `JSON.stringify` was used for all non-snippet fields (Phase 4 mandate), this is automatically satisfied for those fields; verify only the `CODE_*` template literals manually.
 
 If type-check fails, attempt to fix obvious issues (missing comma, stray `;`, wrong template literal escape). If still failing after one repair attempt, surface the errors to the user.
 
@@ -267,12 +279,13 @@ If type-check fails, attempt to fix obvious issues (missing comma, stray `;`, wr
 - [ ] All `<`, `>`, `&` in code content are HTML-escaped (`&lt;`, `&gt;`, `&amp;`) — except inside `<span class="…">` tags themselves.
 - [ ] Every annotation line number has a matching `is-annotated` line in the corresponding section's snippet.
 - [ ] Native `<details>`/`<summary>` keyboard (Tab + Enter) works, and the inline `<script>` adds Escape-to-close. No CDN, no other `<script>` tags.
-- [ ] **Output XSS scan** (three passes):
-  1. `grep -cE '<script|javascript:|[[:space:]\"'\'']on[a-z]+[[:space:]]*=' docs/ExplainPanel.html` returns at most `1` (the single inline Escape-key handler `<script>` at the bottom of the template).
+- [ ] **Output XSS scan** (four passes):
+  1. `grep -cE '<script|javascript:|data:text/html|[[:space:]\"'\'']on[a-z]+[[:space:]]*=' docs/ExplainPanel.html` returns at most `1` (the single inline Escape-key handler `<script>` at the bottom of the template). `data:text/html` is never emitted by the template — any match means an injected payload.
   2. `grep -cE '<(iframe|object|embed|svg|math|link|base|form)\b' docs/ExplainPanel.html` returns `0`. These tags can host script-equivalent payloads (`<iframe srcdoc>`, `<svg onload>`, `<math href>`) and are never emitted by the template itself.
   3. `grep -cE '<meta\b' docs/ExplainPanel.html` returns exactly `2` — the template's own `<meta charset>` and `<meta name="viewport">` in `<head>`, nothing more. A third `<meta>` (e.g. `<meta http-equiv="refresh">`) means an injected payload.
+  4. `grep -cE '<style\b' docs/ExplainPanel.html` returns exactly `1` — the template's own inline stylesheet. A second `<style>` block means CSS injection (exfiltration via `@import`, content spoofing) and cannot be caught by the event-handler grep in pass 1.
 
-  Any other match means an unescaped payload from `title`/`summary`/`annotations`/`module`/`label` slipped through — re-escape the offending field and regenerate. The schema rejects path-traversal in `file` and bounds string lengths, but it cannot enforce HTML-escape of free-form content, so these scans are the last line of defense. The `[[:space:]"']on[a-z]+[[:space:]]*=` clause requires an event-handler attribute to actually begin at an attribute boundary (after whitespace or a quote), which avoids false positives on words containing `on` like `content=` or `connection=`.
+  Any other match means an unescaped payload from `title`/`summary`/`annotations`/`module`/`label`/`color` slipped through — re-escape the offending field and regenerate. The schema rejects path-traversal in `file` and bounds string lengths, but it cannot enforce HTML-escape of free-form content, so these scans are the last line of defense. The `[[:space:]"']on[a-z]+[[:space:]]*=` clause requires an event-handler attribute to actually begin at an attribute boundary (after whitespace or a quote), which avoids false positives on words containing `on` like `content=` or `connection=`.
 
 ### Phase 8 — Report
 

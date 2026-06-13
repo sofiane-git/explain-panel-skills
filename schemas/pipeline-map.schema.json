@@ -37,7 +37,7 @@
         "not": { "pattern": "\\.\\.|^/" }
       },
       "minItems": 1,
-      "description": "Workspace roots scanned during exploration. Single entry for non-monorepo projects, multiple for monorepos. Paths are relative to the repository root. Absolute paths (leading `/`) and traversal sequences (`..`) are rejected at validation time — same containment contract as `file`.",
+      "description": "Workspace roots scanned during exploration. Single entry for non-monorepo projects, multiple for monorepos. Paths are relative to the repository root. Absolute paths (leading `/`) and traversal sequences (`..`) are rejected at schema-validation time (syntactic containment). Symlink targets are checked at audit time — same containment contract as `file`.",
       "examples": [["."], ["app/", "web/"], ["packages/api/", "packages/web/", "packages/shared/"]]
     },
     "header": {
@@ -56,8 +56,9 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 4,
+          "not": { "pattern": "[<>\"&`{}]" },
           "default": "📚",
-          "description": "Single emoji prefixed to the title."
+          "description": "Single emoji prefixed to the title. HTML-special characters (<, >, \", &) and template-literal metacharacters are rejected at validation time."
         }
       }
     },
@@ -98,9 +99,9 @@
               "required": ["text", "border", "bg"],
               "additionalProperties": false,
               "properties": {
-                "text": { "type": "string", "description": "CSS class or hex color for text." },
-                "border": { "type": "string", "description": "CSS class or hex color for border." },
-                "bg": { "type": "string", "description": "CSS class or hex color for background." }
+                "text": { "type": "string", "maxLength": 100, "not": { "pattern": "[<>\"&`{}]" }, "description": "CSS class or hex color for text. HTML-special characters and template-literal metacharacters rejected." },
+                "border": { "type": "string", "maxLength": 100, "not": { "pattern": "[<>\"&`{}]" }, "description": "CSS class or hex color for border. HTML-special characters and template-literal metacharacters rejected." },
+                "bg": { "type": "string", "maxLength": 100, "not": { "pattern": "[<>\"&`{}]" }, "description": "CSS class or hex color for background. HTML-special characters and template-literal metacharacters rejected." }
               },
               "description": "Custom color object. Use when preset colors are exhausted or for brand colors."
             }
@@ -128,7 +129,8 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 4,
-          "description": "Single emoji character (graphemes that render as one glyph allowed)."
+          "not": { "pattern": "[<>\"&`{}]" },
+          "description": "Single emoji character (graphemes that render as one glyph allowed). HTML-special characters (<, >, \", &) and template-literal metacharacters are rejected at validation time."
         },
         "title": {
           "type": "string",
@@ -148,7 +150,7 @@
           "maxLength": 500,
           "pattern": "^[A-Za-z0-9_./\\-]+$",
           "not": { "pattern": "\\.\\.|^/" },
-          "description": "Path to the source file containing the snippet. Relative to repository root, regardless of which `roots` entry it lives under. Path-traversal sequences (`..`), absolute paths (leading `/`), and characters outside `[A-Za-z0-9_./-]` are rejected at validation time — this prevents a hand-edited or auto-generated map from making /explain-panel read files outside the repo when applying its audit phase."
+          "description": "Path to the source file containing the snippet. Relative to repository root, regardless of which `roots` entry it lives under. Path-traversal sequences (`..`), absolute paths (leading `/`), and characters outside `[A-Za-z0-9_./-]` are rejected at schema-validation time — this closes the syntactic-traversal gap. The audit phase (Phase 2 Pass A) additionally resolves each path and verifies the real path (including symlink targets) stays within the repository root."
         },
         "function": {
           "type": "string",
